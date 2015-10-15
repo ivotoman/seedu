@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "out-base.html" %}
 
 {% block content %}
 <div class="container-full">
@@ -16,15 +16,44 @@
             <form class="col-md-5 col-md-offset-2 text-center" action="{{url_for('register')}}" method="POST">
                 <div class="input text-center" style="width:340px;text-align:center;margin:0 auto;">
                     <input class="form-control input-md center-block" title="Please enter your email address here. It will serve as your username." placeholder="Enter your email address" type="email" name="email" value="{{email}}">
-                    <br>
+                    
+                    {% if error_email %}
+                        <span class="text-warning">{{error_email}}</span>
+                    {% else %}
+                        <br>
+                    {% endif %}
+
                     <input class="form-control input-md" title="Please enter your given name here." placeholder="Please enter your given name here." type="text" name="given_name" value="{{given_name}}">
-                    <br>
+                    
+                    {% if error_given_name %}
+                        <span class="text-warning">{{error_given_name}}</span>
+                    {% else %}
+                        <br>
+                    {% endif %}
+
                     <input class="form-control input-md" title="Please enter your given name here." placeholder="Please enter your family name here." type="text" name="family_name" value="{{family_name}}">
-                    <br>
+
+                    {% if error_family_name %}
+                        <span class="text-warning">{{error_family_name}}</span>
+                    {% else %}
+                        <br>
+                    {% endif %}
+
                     <input class="form-control input-md" title="Please enter your password here." placeholder="Please enter your password here." type="password" name="password">
-                    <br>
+
+                    {% if error_password %}
+                        <span class="text-warning">{{error_password}}</span>
+                    {% else %}
+                        <br>
+                    {% endif %}
+
                     <input class="form-control input-md" title="Please verify your password here." placeholder="Please verify your password here." type="password" name="verify">
+
+                    {% if error_verify %}
+                        <span class="text-warning">{{error_verify}}</span>                
+                    {% endif %}
                     <br>
+
                     <span class="input-btn pull-left"><button class="btn btn-md btn-primary" type="submit">Register</button></span>
                 </div>
             </form>

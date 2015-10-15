@@ -34,6 +34,114 @@ db = SQLAlchemy(app)
 
 
 # Create our database model
+# example taken from http://techarena51.com/index.php/many-to-many-relationships-with-flask-sqlalchemy/
+standardcurricula_courses=db.Table('standardcurricula_courses',                            
+                             db.Column('standardcurriculum_id', db.Integer,db.ForeignKey('standardCurricula.id'), nullable=False),
+                             db.Column('course_id',db.Integer,db.ForeignKey('courses.id'),nullable=False),
+                             db.PrimaryKeyConstraint('standardcurriculum_id', 'course_id') )
+
+
+class StandardCurriculum(db.Model):
+    __tablename__ = 'standardCurricula'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique= True, nullable = False)
+    description = db.Column(db.Text, nullable = True)
+    grade = db.Column(db.String(100), nullable = False)
+    
+
+    def __init__(self, name, description, grade):
+        self.name = name
+        self.description = description
+        self.grade = grade
+
+    def __repr__(self):
+        # return '<E-mail %r>' % self.email
+        return '<id {}>'.format(self.id)
+
+# # used for customizing order and inclusion of courses, topics and subtopics
+# class SchoolCurriculum(StandardCurriculum):
+#     __tablename__ = 'schoolCurricula'
+#     # This id below should reference StandardCurriculum. Hence, define it as foreign key. 
+#     # Source: http://stackoverflow.com/questions/25189017/tablemodel-inheritance-with-flask-sqlalchemy
+#     id = db.Column(db.Integer, ForeignKey('standardcurriculum.id'), primary_key=True)
+#     current_balance = db.Column(db.Float)
+
+# class CourseGroup(object):
+#     """
+#     CourseGroup could serve as an unifying connection between the same courses in different 
+#     grades - e.g. mathematics on elementary school would be linked to mathematics on secodnary, 
+#     high- and university courses
+#     """
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(100), nullable = False)
+#     description = db.Column(db.Text, nullable = True)
+#     category = db.Column(db.List) # check if list exists. this should hold info on categories eg natural sciences, social sciences etc.
+#     #i need to add "coursegroup_id" to course class in order to complete it
+
+#     def __init__(self, arg):
+#         self.arg = arg
+        
+
+class Course(db.Model):
+    __tablename__ = 'courses'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable = False)
+    description = db.Column(db.Text, nullable = True)
+    grade = db.Column(db.String(100), nullable = False)
+    standardCurricula = db.relationship("StandardCurriculum", secondary=standardcurricula_courses, backref='courses')
+    topics = db.relationship("Topic", backref="course")
+
+    def __init__(self, name, description, grade):
+        self.name = name
+        self.description = description
+        self.grade = grade
+
+    def __repr__(self):
+        # return '<E-mail %r>' % self.email
+        return '<id {}>'.format(self.id)
+
+class Topic(db.Model):
+    __tablename__ = 'topics'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable = False)
+    description = db.Column(db.Text, nullable = True)
+    topic_order = db.Column(db.Integer, nullable = True)
+    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
+    subtopics = db.relationship("Subtopic", backref="topic")
+
+    def __init__(self, name, description, topic_order, course_id):
+        self.name = name
+        self.description = description
+        self.year = year
+        self.topic_order = topic_order
+        self.course_id = course_id
+
+    def __repr__(self):
+        # return '<E-mail %r>' % self.email
+        return '<id {}>'.format(self.id)
+
+class Subtopic(db.Model):
+    __tablename__ = 'subtopics'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable = False)
+    description = db.Column(db.String(1000), nullable = True)
+    year = db.Column(db.Integer, nullable = True)
+    subtopic_order = db.Column(db.Integer, nullable = True)
+    hours =  db.Column(db.Float, nullable = True, default=0.0)
+    topic_id = db.Column(db.Integer, db.ForeignKey('topics.id'))
+
+    def __init__(self, name, description, year, subtopic_order, hours, topic_id):
+        self.name = name
+        self.description = description
+        self.year = year
+        self.subtopic_order = subtopic_order
+        self.hours = hours
+        self.topic_id = topic_id
+
+    def __repr__(self):
+        # return '<E-mail %r>' % self.email
+        return '<id {}>'.format(self.id)
+
 class User(db.Model):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
@@ -52,7 +160,9 @@ class User(db.Model):
     def __repr__(self):
         # return '<E-mail %r>' % self.email
         return '<id {}>'.format(self.id)
-        # return self
+
+        
+
 
 ###############################################################
 ###############################################################
@@ -68,26 +178,17 @@ def index():
 
         # Check that email does not already exist (not a great query, but works)
         if email and password:
-            print "login"
             user = authenticate(email, password)
-            print "authenticate user", user
+            
             if user:
-                return render_template('home.html', user = user)
-        return render_template('index.html', login_email = email, login_error = "wrong username or password")
-        # params['login_error'] = "incorrect username or password"
-
-    
+                return render_template('admin-home.html', user = user)
+        return render_template('index.html', login_email = email, login_error = "incorrect username or password")
 
     return render_template('index.html')
 
 # Register user and create an entry to the database. send to welcome page
-@app.route('/register', methods=['POST'])
+@app.route('/register', methods=['GET', 'POST'])
 def register():
-    email = None
-    family_name = None
-    given_name = None
-    password = None
-
     if request.method == 'POST':
         have_error = False
         email = request.form['email']
@@ -130,7 +231,6 @@ def register():
         print "have_error4", have_error
 
 
-
         # Check that email does not already exist (not a great query, but works)
         if not have_error:
             pw_hash = make_pw_hash(email, password)
@@ -139,30 +239,12 @@ def register():
             db.session.commit()
             return render_template('welcome.html', user = reg)
 
-    return render_template('index.html', **params)
+    return render_template('index.html')
 
 
-# Register user and create an entry to the database. send to welcome page
-@app.route('/home', methods=['POST'])
-def login():
-    email = None
-
-    if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-
-        # Check that email does not already exist (not a great query, but works)
-        if email and password:
-            print "login"
-            user = authenticate(email, password)
-            print "authenticate user", user
-            if user:
-                return render_template('home.html', user = user)
-        # params['login_error'] = "incorrect username or password"
-
-    return render_template('index.html', login_email = email)
-
-
+@app.route('/admin', methods=['GET'])
+def admin():
+    return render_template('admin-home.html')
 
 
 

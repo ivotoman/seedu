@@ -1,5 +1,6 @@
 html,body {
   height:100%;
+  padding-top: 25px;
 }
 
 h1 {
@@ -30,5 +31,10 @@ h1 {
 
 .v-center {
   margin-top:7%;
+}
+
+.text-warning {
+  margin: 0px;
+  border: 0px;
 }
   
