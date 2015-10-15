@@ -2,9 +2,12 @@ import os
 import re
 import random
 import hashlib
+from string import letters
 
 from flask import Flask, render_template, request
 from flask.ext.sqlalchemy import SQLAlchemy
+from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.orm.exc import MultipleResultsFound
 
 ###############################################################
 ###############################################################
@@ -35,9 +38,9 @@ class User(db.Model):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True)
-    given_name = db.Column(db.String(50), nullable=False)
-    family_name = db.Column(db.String(120), nullable=False)
-    pw_hash = db.Column(db.String(600), nullable=False)
+    given_name = db.Column(db.String(50)) #, nullable=False)
+    family_name = db.Column(db.String(120)) #, nullable=False)
+    pw_hash = db.Column(db.String(600)) #, nullable=False)
 
 
     def __init__(self, email, given_name, family_name, pw_hash):
@@ -47,7 +50,9 @@ class User(db.Model):
         self.pw_hash = pw_hash
 
     def __repr__(self):
-        return '<E-mail %r>' % self.email
+        # return '<E-mail %r>' % self.email
+        return '<id {}>'.format(self.id)
+        # return self
 
 ###############################################################
 ###############################################################
@@ -55,8 +60,24 @@ class User(db.Model):
 ###############################################################
 ###############################################################
 # Set "homepage" to index.html
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+
+        # Check that email does not already exist (not a great query, but works)
+        if email and password:
+            print "login"
+            user = authenticate(email, password)
+            print "authenticate user", user
+            if user:
+                return render_template('home.html', user = user)
+        return render_template('index.html', login_email = email, login_error = "wrong username or password")
+        # params['login_error'] = "incorrect username or password"
+
+    
+
     return render_template('index.html')
 
 # Register user and create an entry to the database. send to welcome page
@@ -66,8 +87,6 @@ def register():
     family_name = None
     given_name = None
     password = None
-
-
 
     if request.method == 'POST':
         have_error = False
@@ -95,11 +114,13 @@ def register():
         if not valid_password(password):
             params['error_password'] = "That wasn't a valid password."
             have_error = True
+            
         elif password != verify:
             params['error_verify'] = "Your passwords didn't match."
             have_error = True
         print "have_error3", have_error
 
+        print "email validation"
         if not valid_email(email):
             params['error_email'] = "That's not a valid email."
             have_error = True
@@ -122,7 +143,7 @@ def register():
 
 
 # Register user and create an entry to the database. send to welcome page
-@app.route('/login', methods=['POST'])
+@app.route('/home', methods=['POST'])
 def login():
     email = None
 
@@ -134,10 +155,10 @@ def login():
         if email and password:
             print "login"
             user = authenticate(email, password)
+            print "authenticate user", user
             if user:
                 return render_template('home.html', user = user)
-        params['login_error'] = "incorrect username or password"
-        return redirect(url_for('indes', **params))
+        # params['login_error'] = "incorrect username or password"
 
     return render_template('index.html', login_email = email)
 
@@ -151,8 +172,11 @@ def login():
 ###############################################################
 ###############################################################
 def authenticate(email, password):
-    user = db.session.query(User).filter_by(email = email).one()
+    user = taken_email(email)
     if user:
+        print "email", email
+        print "password", password
+        print "user.pw_hash", user.pw_hash
         if valid_pw(email, password, user.pw_hash):
             return user
     return None
@@ -171,11 +195,21 @@ def valid_password(password):
 
 EMAIL_RE  = re.compile(r'^[\S]+@[\S]+\.[\S]+$')
 def valid_email(email):
+    print "valid_email", email
     return not email or EMAIL_RE.match(email)
 
 def taken_email(email):
-    user = db.session.query(User).filter(User.email == email).one()
-    return user
+
+    try:
+        user = db.session.query(User).filter_by(email = email).one()
+        print "user", repr(user)
+        return user
+    except MultipleResultsFound, e:
+        return None
+        # Deal with it
+    except NoResultFound, e:
+        return None
+        # Deal with that as well
 
 def check_email(email):
     return(taken_email(email))
@@ -199,7 +233,14 @@ def make_pw_hash(name, pw, salt = None):
 
 def valid_pw(name, password, pw_hash):
     salt = pw_hash.split('|')[0]
-    return pw_hash == make_pw_hash(name, password, salt)
+    print "name", name
+    print "password", password
+    print "pw_hash", pw_hash
+    print "salt", salt
+    correct_pw_hash = make_pw_hash(name, password, salt)
+    print "correct_pw_hash", correct_pw_hash
+    print "pw_hash == correct_pw_hash", pw_hash == correct_pw_hash
+    return pw_hash == correct_pw_hash
 
 
 

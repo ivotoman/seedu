@@ -36,7 +36,7 @@
             <br>
             <br>
             <br>
-            <form class="col-md-5 col-md-offset-2 text-center" action="{{url_for('login')}}" method="POST">
+            <form class="col-md-5 col-md-offset-2 text-center" action="{{url_for('index')}}" method="POST">
                 <div class="input text-center" style="width:340px;text-align:center;margin:0 auto;">
                     <input class="form-control input-md center-block" title="Please enter your email address here. It will serve as your username." placeholder="Enter your email address" type="email" name="email" value="{{login_email}}">
                     <br>
@@ -45,6 +45,8 @@
                     <br>
                     <span class="input-btn pull-right"><button class="btn btn-md btn-primary" type="submit">Login</button></span>
                 </div>
+                <br>
+                <div class="text-warning">{{login_error}}</div>
             </form>
         </div>
 
