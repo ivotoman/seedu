@@ -181,10 +181,10 @@ def index():
             user = authenticate(email, password)
             
             if user:
-                return render_template('admin-home.html', user = user)
-        return render_template('index.html', login_email = email, login_error = "incorrect username or password")
+                return render_template('student/home.html', user = user)
+        return render_template('out/index.html', login_email = email, login_error = "incorrect username or password")
 
-    return render_template('index.html')
+    return render_template('out/index.html')
 
 # Register user and create an entry to the database. send to welcome page
 @app.route('/register', methods=['GET', 'POST'])
@@ -237,16 +237,30 @@ def register():
             reg = User(email, given_name, family_name, pw_hash)
             db.session.add(reg)
             db.session.commit()
-            return render_template('welcome.html', user = reg)
+            return render_template('student/welcome.html', user = reg)
 
-    return render_template('index.html')
+    return render_template('out/asdf@asdf.as.html')
 
 
 @app.route('/admin', methods=['GET'])
 def admin():
-    return render_template('admin-home.html')
+    return render_template('admin/home/index.html')
 
 
+
+@app.route('/admin/courses', methods=['GET'])
+def courses():
+    try:
+        courses = db.session.query(Course).all()
+        print "courses", repr(courses)
+        return render_template('admin/courses/all.html', courses = courses)
+    except:
+        return "ooops, what happened here?"
+        # Deal with it
+
+@app.route('/admin/courses/new', methods=['GET'])
+def new_course():
+    return render_template('admin/courses/new.html')
 
 ###############################################################
 ###############################################################

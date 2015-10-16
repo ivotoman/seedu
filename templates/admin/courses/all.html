@@ -1,0 +1,72 @@
+{% extends "admin/base-courses.html" %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-10 text-left">
+            <h1>List of all existing courses</h1>        
+        </div>
+
+        <div class="col-md-2 text-left">
+
+            <a id="verticalButton" class="btn btn-primary pull-right button-with-h1" href="{{url_for('new_course')}}" role="button">New course</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <hr>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-striped table-condensed table-responsive">
+                <thead>
+                    <tr>
+                        <td>name</td>
+                        <td>grade</td>
+                        <td>topics</td>
+                        <td>hours</td>
+                        <td># questions</td>
+                        <td># schools</td>
+                        <td># classes</td>
+                        <td># students</td>
+                    </tr>
+                </thead>
+                <tbody class='table-hover'>
+                {% if courses %}
+
+                    {% for course in courses %}
+                        <tr>
+                            <td>{{course.name}}</td>
+                            <td>{{course.grade}}</td>
+
+                            <td>
+                            {% for topic in topics %}
+                                {{course.topics}}<br>
+                            {% endfor %}
+                            </td>
+
+                            <td>hours</td>
+                            <td># questions</td>
+                            <td># schools</td>
+                            <td># classes</td>
+                            <td># students</td>
+                        </tr>
+                    {% endfor %}
+
+                {% else %}
+                    
+                    <tr>
+                        <td colspan="8">No courses</td>
+                    </tr>
+
+                {% endif %}
+                
+                </tbody>
+            </table>
+        </div>
+
+            
+    </div>
+
+
+{% endblock %}

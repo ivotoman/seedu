@@ -1,7 +1,8 @@
-{% extends "base.html" %}
+{% extends "student/base.html" %}
 
 {% block content %}
 
+<div class="container">
     <div class="row">
         <div class="col-mlg-12">
             <h1>Welcome {{user.given_name}}</h1>
@@ -9,6 +10,7 @@
     </div>
 
     <hr>
+
     <div class="row">
         <div class="col-md-4">
             <div class="panel panel-default">
@@ -39,14 +41,5 @@
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-lg-12">
-            <br>
-            <br>
-            <p class="pull-right"><a href="http://www.bootply.com">Template from Bootply</a> &nbsp; ©Copyright 2014 ACME<sup>TM</sup> Brand.</p>
-            <br>
-            <br>
-        </div>
-    </div>
-
+</div>
 {% endblock %}

@@ -29,6 +29,10 @@ h1 {
   text-decoration:none;
 }
 
+.button-with-h1 {
+  margin-top: 25px;
+}
+
 .v-center {
   margin-top:7%;
 }

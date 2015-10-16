@@ -28,12 +28,12 @@
       </div>
       <div class="collapse navbar-collapse">
         <ul class="nav navbar-nav navbar-left">
-          <li class="active"><a href="admin">Home</a></li>
-          <li><a href="{{ url_for('admin/schools'') }}">Schools</a></li>
-          <li><a href="{{ url_for('admin/standard-curricula'') }}">Standard Curricula</a></li>
-          <li><a href="{{ url_for('admin/course'') }}">Courses</a></li>
-          <li><a href="{{ url_for('admin/questions'') }}">Questions</a></li>
-          <li><a href="{{ url_for('admin/users'') }}">Users</a></li>
+          <li class="active"><a href="#">Home</a></li>
+          <li><a href="#">Schools</a></li>
+          <li><a href="#">Standard Curricula</a></li>
+          <li><a href="#">Courses</a></li>
+          <li><a href="#">Questions</a></li>
+          <li><a href="#">Users</a></li>
         </ul>
       </div><!--/.nav-collapse -->
     </div>
@@ -41,13 +41,9 @@
 
   </div>
 
-<div class="container">
-    <hr>
-    <div class="row">
+
     {% block content %}
     {% endblock %}
-    </div>
-</div>
 
     <!-- script references -->
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
