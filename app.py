@@ -3,8 +3,9 @@ import re
 import random
 import hashlib
 from string import letters
+import json
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, abort, json, jsonify, redirect
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm.exc import MultipleResultsFound
@@ -112,7 +113,6 @@ class Topic(db.Model):
     def __init__(self, name, description, topic_order, course_id):
         self.name = name
         self.description = description
-        self.year = year
         self.topic_order = topic_order
         self.course_id = course_id
 
@@ -125,12 +125,12 @@ class Subtopic(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable = False)
     description = db.Column(db.String(1000), nullable = True)
-    year = db.Column(db.Integer, nullable = True)
+    year = db.Column(db.Integer, nullable = True) # this might need to be changed in order to personalize curricula
     subtopic_order = db.Column(db.Integer, nullable = True)
     hours =  db.Column(db.Float, nullable = True, default=0.0)
     topic_id = db.Column(db.Integer, db.ForeignKey('topics.id'))
 
-    def __init__(self, name, description, year, subtopic_order, hours, topic_id):
+    def __init__(self, name, description, subtopic_order,  topic_id, year = 0, hours = 0):
         self.name = name
         self.description = description
         self.year = year
@@ -239,7 +239,7 @@ def register():
             db.session.commit()
             return render_template('student/welcome.html', user = reg)
 
-    return render_template('out/asdf@asdf.as.html')
+    return render_template('out/index.html')
 
 
 @app.route('/admin', methods=['GET'])
@@ -258,9 +258,55 @@ def courses():
         return "ooops, what happened here?"
         # Deal with it
 
-@app.route('/admin/courses/new', methods=['GET', 'POST'])
+@app.route('/admin/courses/new', methods=['GET','POST', "PUT"])
 def new_course():
-    return render_template('admin/courses/new.html')
+    if request.method == 'PUT':
+
+        # load json otherwise it will be unicode instead of a dictionary         
+        content = json.loads(request.get_json())#["course"]
+
+        if not content:
+            print "bad response format"
+            abort(400)
+        else:          
+            course_name = content["course"]["course_name"]
+            course_grade = content["course"]["course_grade"]
+            course_description = content["course"]["course_description"]
+            new_course = Course(name = course_name, grade = course_grade, description = course_description)
+            db.session.add(new_course)
+            db.session.commit()
+            print "new_course", new_course
+
+            # iterating through keys and values of course
+            for kc, vc in content["course"].items():    
+                # if any key of the course starts with topic, create a new topic and...
+                if kc.startswith("topic_"):
+                    topic_name = vc["topic_name"]
+                    topic_order = vc["topic_order"]
+                    topic_description = vc["topic_description"]
+                    new_topic = Topic(name = topic_name, description = topic_description, topic_order = topic_order, course_id = new_course.id)
+                    db.session.add(new_topic)
+                    db.session.commit()
+                    print "new_topic", new_topic
+
+                    # after topic is created iterating through all the keys and values of topic 
+                    for kt, vt in vc.items():
+                        # if any key of the topic starts with subtopic, create a new subtopic. Cycle will return to one up (looking for more subtopic, then looking for more topics)
+                        if kt.startswith("subtopic_"):
+                            subtopic_name = vt["subtopic_name"]
+                            subtopic_order = vt["subtopic_order"]
+                            subtopic_description = vt["subtopic_description"]
+                            new_subtopic = Subtopic(name = subtopic_name, description = subtopic_description, subtopic_order = subtopic_order, topic_id = new_topic.id)
+                            db.session.add(new_subtopic)
+                            db.session.commit()
+                            print "new_subtopic", new_subtopic
+
+    elif request.method == 'POST':   
+        return redirect("/admin/courses", code=200)
+        # return render_template('admin/courses/all.html')
+    else:
+        return render_template('admin/courses/new.html')
+
 
 ###############################################################
 ###############################################################
