@@ -258,7 +258,7 @@ def courses():
         return "ooops, what happened here?"
         # Deal with it
 
-@app.route('/admin/courses/new', methods=['GET'])
+@app.route('/admin/courses/new', methods=['GET', 'POST'])
 def new_course():
     return render_template('admin/courses/new.html')
 

@@ -8,11 +8,15 @@
     <meta name="generator" content="Bootply" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
-    <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.min.css" rel="stylesheet">
-    <!--[if lt IE 9]>
-      <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+    <!-- <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.min.css" rel="stylesheet"> -->
+    
     <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
+    
+
+
+    <script src="{{ url_for('static', filename='js/jQuery.js')}}"></script>
+    <!-- More on helper.js in the class -->
+    <script src="{{ url_for('static', filename='js/helper.js')}}"></script>
 </head>
 
 <body>
@@ -20,7 +24,7 @@
     {% block navbar %}
     {% endblock %}
 
-
+<!-- 
 <div class="navbar-inverse navbar-fixed-bottom">
   <div class="container">
     <div class="navbar-header">
@@ -30,11 +34,12 @@
     </div>
   </div>
 </div> 
-
+ -->
     <!-- script references -->
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
     <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/adminBuilder.js') }}"></script>
 </body>
 
 </html>
