@@ -3,7 +3,7 @@
 {% block content %}
     <div class="row">
         <div class="col-xs-12 text-left">
-            <h1>Create a new course</h1>
+            <h1>Edit course</h1>
         </div>    
     </div>
     <!-- /row -->
@@ -25,7 +25,7 @@
                 <div class="col-xs-7">
                     <div class="input-group">
                         <span class="input-group-addon control-label required">Name:</span>
-                        <input type="text" class="form-control required" placeholder="Please enter the course name" name="course[course_name]" required>
+                        <input type="text" class="form-control required" value="{{course.name}}" name="course[course_name]" required>
                     </div>
                 </div>
 
@@ -36,13 +36,13 @@
                         </div>
                         <div class="col-xs-10">
                             <select class="form-control" name="course[course_grade]">
-                                <option value="primary">primary</option>
-                                <option value="secondary">secondary</option>
-                                <option value="high-school">high-school</option>
-                                <option value="vocational">vocational</option>
-                                <option value="bachelor">bachelor</option>
-                                <option value="master">master</option>
-                                <option value="doctoral">doctoral</option>
+                                <option value="primary" {% if course.grade=="primary"%} selected="selected"{% endif %}>primary</option>
+                                <option value="secondary" {% if course.grade=="secondary"%} selected="selected"{% endif %}>secondary</option>
+                                <option value="high-school" {% if course.grade=="high-school"%} selected="selected"{% endif %}>high-school</option>
+                                <option value="vocational" {% if course.grade=="vocational"%} selected="selected"{% endif %}>vocational</option>
+                                <option value="bachelor" {% if course.grade=="bachelor"%} selected="selected"{% endif %}>bachelor</option>
+                                <option value="master" {% if course.grade=="master"%} selected="selected"{% endif %}>master</option>
+                                <option value="doctoral" {% if course.grade=="doctoral"%} selected="selected"{% endif %}>doctoral</option>
                                 
                             </select>
                         </div>
@@ -55,7 +55,7 @@
                 <div class="col-xs-11">
                     <div class="form-group">
                         <label class="control-label col-xs-1" for="course_description">Description:</label>
-                        <textarea rows="2" class="form-control required" name="course[course_description]" placeholder="Please write a bried description of the course here">{{course_description}}</textarea>
+                        <textarea rows="2" class="form-control required" name="course[course_description]" placeholder="Please write a bried description of the course here">{{course.description}}</textarea>
                         
                     </div>    
                 </div>
@@ -64,8 +64,8 @@
     </div><!-- /row -->
 
     <hr>
-    
-    
+
+    {% for topic in course.topics %}
     <div class="row topic-row" id="1"> <!-- topic row -->
 
         <div class="col-xs-4"> <!-- topic panel -->
@@ -76,7 +76,7 @@
                 <div class="col-xs-11">
                     <div class="input-group">
                         <span class="input-group-addon control-label required">Topic name:</span>
-                        <input type="text" class="form-control required" placeholder="Please enter the topic name" name="course[topic_1][topic_name]" required>
+                        <input type="text" class="form-control required" value="{{topic.name}}" placeholder="Please enter the topic name" name="course[topic_{{topic.id}}][topic_name]" required>
                     </div>   
                 </div>
             </div> <!-- /row topic name row -->
@@ -87,7 +87,7 @@
                 <div class="col-xs-11">
                     <div class="input-group">
                         <span class="input-group-addon control-label">Order:</span>
-                        <input type="number" class="form-control required" placeholder="Topic order" name="course[topic_1][topic_order]" required>
+                        <input type="number" class="form-control required" value="{{topic.topic_order}}" placeholder="Topic order" name="course[topic_{{topic.id}}][topic_order]" required>
                     </div>
                 </div>
             </div>
@@ -98,7 +98,7 @@
                 <div class="col-xs-11">
                     <div class="form-group">
                         <label class="control-label" for="topic_description">Topic description:</label>
-                        <textarea rows="4" class="form-control required" name="course[topic_1][topic_description]" placeholder="Please write a bried description of the topic here">{{topic_description_1}}</textarea>
+                        <textarea rows="4" class="form-control required" name="course[topic_{{topic.id}}][topic_description]" placeholder="Please write a bried description of the topic here">{{topic.description}}</textarea>
                     </div> 
                 </div>
             </div>
@@ -111,6 +111,8 @@
             </div>
 
             <div class="col-xs-11"> <!-- effective subtopic panel -->
+
+                {% for subtopic in topic.subtopics %}
                 <div class="row"> <!-- subtopic row -->
                     <div class="col-xs-12">
                         <div class="row"> <!-- subtopic name + grade row -->
@@ -118,14 +120,14 @@
                                 <div class="col-xs-8">
                                     <div class="input-group">
                                         <span class="input-group-addon control-label">Subtopic name:</span>
-                                        <input type="text" class="form-control required" placeholder="Please enter the subtopic name" name="course[topic_1][subtopic_1][subtopic_name]" required>
+                                        <input type="text" class="form-control required" value="{{subtopic.name}}" placeholder="Please enter the subtopic name" name="course[topic_{{topic.id}}][subtopic_{{subtopic.id}}][subtopic_name]" required>
                                     </div> 
                                 </div>
 
                                 <div class="col-xs-3">
                                     <div class="input-group">
                                         <span class="input-group-addon control-label">Order:</span>
-                                        <input type="number" class="form-control required" placeholder="Subtopic order" name="course[topic_1][subtopic_1][subtopic_order]" required>
+                                        <input type="number" class="form-control required" value="{{subtopic.subtopic_order}}" placeholder="Subtopic order" name="course[topic_{{topic.id}}][subtopic_{{subtopic.id}}][subtopic_order]" required>
                                     </div>
                                     
                                 </div>
@@ -137,6 +139,7 @@
                             </div> <!-- /subtopic name + grade column -->
                         </div><!-- /subtopic name + grade row -->
                         <br>
+
                         <div class="row"> <!-- subtopic year + # hours row -->
                             <div class="col-xs-12"> <!-- subtopic year + # hours column -->
                                 <div class="col-xs-6">
@@ -164,11 +167,12 @@
                         <div class="row"> <!-- subtopic description row -->
                             <div class="col-xs-12"> <!-- subtopic descripton column -->
                                 <div class="col-xs-2">
-                                    <label class="control-label" for="subtopic_description">Subtopic description:</label>
                                 </div>
                                 <div class="col-xs-10">
                                     <div class="form-group">
-                                        <textarea rows="3" class="form-control required" name="course[topic_1][subtopic_1][subtopic_description]" placeholder="Please write a bried description of the subtopic here"></textarea>
+                                        <label class="control-label" for="subtopic_description">Subtopic description:</label>
+                                        <textarea rows="3" class="form-control required" name="course[topic_{{topic.id}}][subtopic_{{subtopic.id}}][subtopic_description]" placeholder="Please write a bried description of the subtopic here"> {{subtopic.description}}
+                                        </textarea>
                                     </div> 
                                 </div> 
                             </div> <!-- /subtopic name + grade column -->
@@ -177,6 +181,8 @@
                     </div>
                 </div> <!-- /subtopic row -->
                 <hr>
+
+                {% endfor %}
 
                 <button class="btn btn-success pull-right subtopic" id="subtopic">Add a subtopic</button>
 
@@ -188,6 +194,9 @@
 
     </div> <!-- /topic row -->
     <hr>
+    {% endfor %}
+
+    
     <a class="topic btn btn-success pull-left" role="button" id="topic">Add a topic</a>
 <br><br>
 <input type="submit" class="btn btn-primary pull-left" id="submit-new-course">

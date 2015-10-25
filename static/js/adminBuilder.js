@@ -2,6 +2,8 @@ var topicCounter = 2
 var subtopicCounter = 2
 
 
+
+
 $( 'body' ).click(function(event) {
 
 	var element = $(event.target);
@@ -34,7 +36,19 @@ $( 'body' ).click(function(event) {
 		subtopicCounter ++;
 		event.preventDefault();
 		newSubtopic.insertBefore(element);
-    } ; 
+
+    } else if (element.attr("id") == "submit-edit-course") {
+    	// event.preventDefault(); //change return to false together with event.preventDefault(); in order to prevent submit
+        var content = JSON.stringify($('form').serializeObject());
+        $('#result').text(content);
+        var pathname = window.location.pathname
+        $.ajax({
+		    type : "POST",
+		    url : pathname	,
+		    data: JSON.stringify(content, null, '\t'),
+		    contentType: 'application/json;charset=UTF-8'
+		});
+    }; 
 });
 
 
@@ -107,8 +121,8 @@ $( 'body' ).click(function(event) {
 })(jQuery);
 
 $(function() {
-    $('form').submit(function(event) {
-        // event.preventDefault();
+    $('submit-new-course').submit(function(event) {
+        // event.preventDefault(); //change return to false together with event.preventDefault(); in order to prevent submit
         var content = JSON.stringify($('form').serializeObject());
         $('#result').text(content);
 
@@ -118,9 +132,33 @@ $(function() {
 		    data: JSON.stringify(content, null, '\t'),
 		    contentType: 'application/json;charset=UTF-8'
 		});
-        return true;
+        return true; //change return to false together with event.preventDefault(); in order to prevent submit
     });
 });
+
+// $(function() {
+//     $('submit-edit-course').submit(function(event) {
+//         event.preventDefault(); //change return to false together with event.preventDefault(); in order to prevent submit
+//         var content = JSON.stringify($('form').serializeObject());
+//         $('#result').text(content);
+//         var pathname = window.location.pathname
+//         $.ajax({
+// 		    type : "PUT",
+// 		    url : pathname	,
+// 		    data: JSON.stringify(content, null, '\t'),
+// 		    contentType: 'application/json;charset=UTF-8'
+// 		});
+//         return false; //change return to false together with event.preventDefault(); in order to prevent submit
+//     });
+// });
+
+
+
+
+function confirmAction(){
+      var confirmed = confirm("Are you sure? This will remove this entry forever.");
+      return confirmed;
+}
 
 
 

@@ -250,13 +250,13 @@ def admin():
 
 @app.route('/admin/courses', methods=['GET'])
 def courses():
-    try:
+    # try:  
         courses = db.session.query(Course).all()
         print "courses", repr(courses)
         return render_template('admin/courses/all.html', courses = courses)
-    except:
-        return "ooops, what happened here?"
-        # Deal with it
+    # except:
+    #     return "ooops, what happened here?"
+    #     # Deal with it
 
 @app.route('/admin/courses/new', methods=['GET','POST', "PUT"])
 def new_course():
@@ -296,16 +296,108 @@ def new_course():
                             subtopic_name = vt["subtopic_name"]
                             subtopic_order = vt["subtopic_order"]
                             subtopic_description = vt["subtopic_description"]
-                            new_subtopic = Subtopic(name = subtopic_name, description = subtopic_description, subtopic_order = subtopic_order, topic_id = new_topic.id)
+                            subtopic_year = vt["subtopic_year"]
+                            subtopic_hours = vt["subtopic_hours"]
+                            new_subtopic = Subtopic(name = subtopic_name, 
+                                description = subtopic_description, 
+                                subtopic_order = subtopic_order, 
+                                topic_id = new_topic.id,
+                                year = subtopic_year,
+                                hours = subtopic_hours)
                             db.session.add(new_subtopic)
                             db.session.commit()
                             print "new_subtopic", new_subtopic
 
+        #### these conditions are WRONG, i need to check all topics and subtopics        
+        if new_subtopic and new_topic and new_course: 
+            """
+            write a function, which will revert changes if there has been a problem with creation of any item
+            """
+            pass
+
+
+
     elif request.method == 'POST':   
-        return redirect("/admin/courses", code=200)
+        return redirect("/admin/courses", code=302)
         # return render_template('admin/courses/all.html')
     else:
         return render_template('admin/courses/new.html')
+
+@app.route('/admin/courses/<int:course_id>', methods=['GET'])
+def view_course(course_id):
+    course = db.session.query(Course).filter_by(id = course_id).one()
+    return render_template('admin/courses/view.html', course = course)
+
+@app.route('/admin/courses/<int:course_id>/edit', methods=['GET', 'POST'])
+def edit_course(course_id):
+    course = db.session.query(Course).filter_by(id = course_id).one()
+    if request.method == 'POST':
+        # load json otherwise it will be unicode instead of a dictionary         
+        content = json.loads(request.get_json())#["course"]
+
+        if not content:
+            print "bad response format"
+            abort(400)
+        else:          
+            course.name = content["course"]["course_name"]
+            course.grade = content["course"]["course_grade"]
+            course.description = content["course"]["course_description"]
+            db.session.add(course)
+            db.session.commit()
+            print "content course: ", content["course"]
+            # iterating through keys and values of course
+            for kc, vc in content["course"].items():    
+                # if any key of the course starts with topic, create a new topic and...
+                if kc.startswith("topic_"):
+                    topic = db.session.query(Topic).filter_by(id = kc.split("_")[-1]).one()
+                    print "topic: ", topic
+                    print "kc topic: ", kc
+                    topic.name = vc["topic_name"]
+                    topic.order = vc["topic_order"]
+                    topic.description = vc["topic_description"]
+                    db.session.add(topic)
+                    db.session.commit()
+
+                    # after topic is created iterating through all the keys and values of topic 
+                    for kt, vt in vc.items():
+                        # if any key of the topic starts with subtopic, create a new subtopic. Cycle will return to one up (looking for more subtopic, then looking for more topics)
+                        if kt.startswith("subtopic_"):
+                            print "kt: ", kt
+                            print 'vt.has_key("subtopic_hours"): ', vt.has_key("subtopic_hours")
+                            subtopic = db.session.query(Subtopic).filter_by(id = kt.split("_")[-1]).one()
+                            print "subtopic: ", subtopic
+                            print "kt subtopic: ", kt
+                            subtopic.name = vt["subtopic_name"]
+                            subtopic.order = vt["subtopic_order"]
+                            subtopic.description = vt["subtopic_description"]
+                            if vt.has_key("subtopic_year"):
+                                subtopic.year = vt["subtopic_year"]
+                                print 'subtopic.year: ', subtopic.year 
+                                print 'vt["subtopic_year"]: ', vt["subtopic_year"]
+                            if vt.has_key("subtopic_hours"):
+                                subtopic.hours = vt["subtopic_hours"]
+                                print 'subtopic.hours: ', subtopic.hours 
+                                print 'vt["subtopic_hours"]: ', vt["subtopic_hours"]
+                            db.session.add(subtopic)
+                            db.session.commit()
+
+        #### these conditions are WRONG, i need to check all topics and subtopics        
+        if subtopic and topic and course: 
+            """
+            write a function, which will revert changes if there has been a problem with creation of any item
+            """
+            pass
+
+
+    course = db.session.query(Course).filter_by(id = course_id).one()
+    return render_template('admin/courses/edit.html', course = course)
+
+@app.route('/admin/courses/<int:course_id>/delete', methods=['GET'])
+def delete_course(course_id):
+    course = db.session.query(Course).filter_by(id = course_id).one()
+    db.session.delete(course)
+    db.session.commit()
+    return redirect("/admin/courses", code=302)
 
 
 ###############################################################

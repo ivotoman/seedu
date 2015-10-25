@@ -29,19 +29,40 @@ var HTMLSubtopicRow =
                             '</div> <!-- /subtopic name + grade column -->' +
                         '</div><!-- /subtopic name + grade row -->' +
                         '<br>' +
+                        '<div class="row"> <!-- subtopic year + # hours row -->' +
+                            '<div class="col-xs-12"> <!-- subtopic year + # hours column -->' +
+                                '<div class="col-xs-6">' +
+                                    '<div class="input-group">' +
+                                        '<span class="input-group-addon control-label">Year:</span>' +
+                                        '<input type="number" class="form-control required" placeholder="Year/grade when it will be taught" name="course[topic_%topicdata%][subtopic_%subtopicdata%][subtopic_year]">' +
+                                    '</div> ' +
+                                '</div>' +
+
+                                '<div class="col-xs-5">' +
+                                    '<div class="input-group">' +
+                                        '<span class="input-group-addon control-label"># hours:</span>' +
+                                        '<input type="number" class="form-control required" placeholder="Hours spent on it" name="course[topic_%topicdata%][subtopic_%subtopicdata%][subtopic_hours]">' +
+                                    '</div>  ' +
+                                '</div>' +
+                                '<div class="col-xs-1">' +
+                                '</div>' +
+                            '</div> <!-- /subtopic year + # hours column -->' +
+                        '</div><!-- /subtopic year + # hours row -->' +
+                        '<br>' +
 
                         '<div class="row"> <!-- subtopic description row -->' +
                             '<div class="col-xs-12"> <!-- subtopic descripton column -->' +
                                 '<div class="col-xs-2">' +
+                                '<label class="control-label" for="subtopic_description">Subtopic description:</label>' +
                                 '</div>' +
                                 '<div class="col-xs-10">' +
                                     '<div class="form-group">' +
-                                        '<label class="control-label" for="subtopic_description">Subtopic description:</label>' +
+
                                         '<textarea rows="3" class="form-control required" name="course[topic_%topicdata%][subtopic_%subtopicdata%][subtopic_description]" placeholder="Please write a bried description of the subtopic here"></textarea>' +
                                     '</div> ' +
                                 '</div> ' +
-                            '</div> <!-- /subtopic name + grade column -->' +
-                        '</div><!-- /subtopic name + grade row -->' +
+                            '</div> <!-- /subtopic description column -->' +
+                        '</div><!-- /subtopic description row -->' +
                     '</div>' +
                   '</div> <!-- /subtopic row -->' +
                   '<hr>';
@@ -99,7 +120,7 @@ var HTMLTopicRow =
                             '<div class="col-xs-12"> <!-- subtopic name + grade column -->' +
                                 '<div class="col-xs-8">' +
                                     '<div class="input-group">' +
-                                        '<span class="input-group-addon control-label">Subtopic name:</span>' +
+                                        '<span class="input-group-addon control-label required">Subtopic name:</span>' +
                                         '<input type="text" class="form-control required" placeholder="Please enter the subtopic name" name="course[topic_%topicdata%][subtopic_%subtopicdata%][subtopic_name]" required>' +
                                     '</div> ' +
                                 '</div>' +
@@ -119,23 +140,43 @@ var HTMLTopicRow =
                             '</div> <!-- /subtopic name + grade column -->' +
                         '</div><!-- /subtopic name + grade row -->' +
                         '<br>' +
+                        '<div class="row"> <!-- subtopic year + # hours row -->' +
+                            '<div class="col-xs-12"> <!-- subtopic year + # hours column -->' +
+                                '<div class="col-xs-6">' +
+                                    '<div class="input-group">' +
+                                        '<span class="input-group-addon control-label">Year:</span>' +
+                                        '<input type="number" class="form-control required" placeholder="Year/grade when it will be taught" name="course[topic_%topicdata%][subtopic_%subtopicdata%][subtopic_year]">' +
+                                    '</div> ' +
+                                '</div>' +
+
+                                '<div class="col-xs-5">' +
+                                    '<div class="input-group">' +
+                                        '<span class="input-group-addon control-label"># hours:</span>' +
+                                        '<input type="number" class="form-control required" placeholder="Hours spent on it" name="course[topic_%topicdata%][subtopic_%subtopicdata%][subtopic_hours]">' +
+                                    '</div>  ' +
+                                '</div>' +
+                                '<div class="col-xs-1">' +
+                                '</div>' +
+                            '</div> <!-- /subtopic year + # hours column -->' +
+                        '</div><!-- /subtopic year + # hours row -->' +
+                        '<br>' +
 
                         '<div class="row"> <!-- subtopic description row -->' +
                             '<div class="col-xs-12"> <!-- subtopic descripton column -->' +
                                 '<div class="col-xs-2">' +
+                                '<label class="control-label" for="subtopic_description">Subtopic description:</label>' +
                                 '</div>' +
                                 '<div class="col-xs-10">' +
                                     '<div class="form-group">' +
-                                        '<label class="control-label" for="subtopic_description">Subtopic description:</label>' +
-                                        '<textarea rows="3" class="form-control required" name="course[topic_%topicdata%][subtopic_%subtopicdata%][subtopic_description]" placeholder="Please write a bried description of the subtopic here">' +
-                                        '</textarea>' +
+
+                                        '<textarea rows="3" class="form-control required" name="course[topic_%topicdata%][subtopic_%subtopicdata%][subtopic_description]" placeholder="Please write a bried description of the subtopic here"></textarea>' +
                                     '</div> ' +
                                 '</div> ' +
-                            '</div> <!-- /subtopic name + grade column -->' +
-                        '</div><!-- /subtopic name + grade row -->' +
+                            '</div> <!-- /subtopic description column -->' +
+                        '</div><!-- /subtopic description row -->' +
                     '</div>' +
-                '</div> <!-- /subtopic row -->' +
-                '<hr>' +
+                  '</div> <!-- /subtopic row -->' +
+                  '<hr>' +
                 '<button class="btn btn-success pull-right subtopic" id="subtopic">Add a subtopic</button>' +
 
             '</div><!-- /effective subtopic panel -->' +

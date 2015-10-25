@@ -41,4 +41,8 @@ h1 {
   margin: 0px;
   border: 0px;
 }
-  
+
+a:hover, .nodecoration {
+    color: #333;
+    text-decoration: none;
+}
