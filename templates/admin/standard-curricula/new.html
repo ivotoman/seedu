@@ -39,7 +39,7 @@
                         <label class="control-label col-xs-1">Grade:</label>
                     </div>
                     <div class="col-xs-9">
-                        <select class="form-control" id="select-grade" name="curriculum_grade" onchange="hideCourses(this.value);">
+                        <select class="form-control" id="select-grade" name="curriculum_grade" onchange="hideCoursesNew();">
                             <option value="primary" {% if grade == "primary" %} selected{%endif%}>primary</option>
                             <option value="secondary"{% if grade == "secondary" %} selected{%endif%}>secondary</option>
                             <option value="high-school"{% if grade == "high-school" %} selected{%endif%}>high-school</option>
@@ -98,7 +98,7 @@
 
 
 <script type="text/javascript">
-hideCourses();
+hideCoursesNew();
 </script>
 
 {% endblock %}

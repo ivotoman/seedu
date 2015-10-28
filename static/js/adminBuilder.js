@@ -3,7 +3,7 @@
 /////////////new standard curricula/////////////
 ////////////////////////////////////////////////
 ////////////////////////////////////////////////
-function hideCourses () {
+function hideCoursesEdit () {
     var courses = $('.available-courses')
     var selected = $("#select-grade").val()
     for (var i = courses.length - 1; i >= 0; i--) {
@@ -19,6 +19,22 @@ function hideCourses () {
         };
     }
 };
+
+function hideCoursesNew () {
+    var courses = $('.available-courses')
+    var selected = $("#select-grade").val()
+    for (var i = courses.length - 1; i >= 0; i--) {
+        if ($(courses[i]).hasClass(selected)) {    
+            $(courses[i]).show()
+                $(courses[i]).find('input').prop('checked', true); // Checks it    
+        } else {
+            $(courses[i]).hide()
+            $(courses[i]).find('input').prop('checked', false); // Unchecks it
+        };
+    }
+};
+
+
 
 $(function() {
     console.log("$('#submit-new-standard-curricula'): " + $('#submit-new-standard-curricula'))
