@@ -1,15 +1,15 @@
-{% extends "admin/base-courses.html" %}
+{% extends "admin/base-standard-curricula.html" %}
 
 {% block content %}
     <div class="row">
         <div class="col-md-10 text-left">
-            <h1>List of all existing courses</h1>        
+            <h1>List of all existing standard curricula</h1>        
         </div>
 
         <div class="col-md-2 text-left">
 
-            <a id="verticalButton" class="btn btn-success pull-right button-with-h1" href="{{url_for('new_course')}}" role="button">
-                 <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>  New course</a>
+            <a id="verticalButton" class="btn btn-success pull-right button-with-h1" href="{{url_for('new_standard_curriculum')}}" role="button">
+                 <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>  New standard curriculum</a>
         </div>
     </div>
 
@@ -24,40 +24,36 @@
                     <tr>
                         <th>name</th>
                         <th>grade</th>
-                        <th>topics</th>
-                        <th>hours</th>
-                        <th># questions</th>
+                        <th># courses</th>
+                        <th># topics</th>
                         <th># schools</th>
+                        <th># teachers</th>
                         <th># classes</th>
                         <th># students</th>
                     </tr>
                 </thead>
                 <tbody class='table-hover'>
-                {% if courses %}
+                {% if standardcurricula %}
 
-                    {% for course in courses %}
+                    {% for standardcurriculum in standardcurricula %}
                         <tr>
                             <td>
-                                {{course.name}} <br>
-                                <a class="nodecoration" href="{{ url_for('view_course', course_id = course.id) }}">
+                                {{standardcurriculum.name}} <br>
+                                <a class="nodecoration" href="{{ url_for('view_standard_curriculum', standardcurriculum_id = standardcurriculum.id) }}">
                                     <span class="glyphicon glyphicon-eye-open" id="view-course" aria-hidden="true"></span> 
                                 </a>
                                 
-                                <a class="nodecoration" href="{{ url_for('edit_course', course_id = course.id) }}">
+                                <a class="nodecoration" href="{{ url_for('edit_standard_curriculum', standardcurriculum_id = standardcurriculum.id) }}">
                                     <span class="glyphicon glyphicon-pencil" id="edit-course" aria-hidden="true"></span> 
                                 </a>
 
-                                <a class="nodecoration" href="{{ url_for('delete_course', course_id = course.id) }}" onclick="return confirmAction()">
+                                <a class="nodecoration" href="{{ url_for('delete_standard_curriculum', standardcurriculum_id = standardcurriculum.id) }}" onclick="return confirmAction()">
                                     <span class="glyphicon glyphicon-trash" id="remove-course" aria-hidden="true"></span> 
                                 </a>
                             </td>
-                            <td>{{course.grade}}</td>
+                            <td>{{standardcurriculum.grade}}</td>
 
-                            <td>
-                            {% for topic in course.topics %}
-                                {{topic.name}}<br>
-                            {% endfor %}
-                            </td>
+                            <td>{{standardcurriculum.courses|length}}</td>
 
                             <td>tbd</td>
                             <td>tbd</td>
@@ -70,7 +66,7 @@
                 {% else %}
                     
                     <tr>
-                        <td colspan="8">No courses</td>
+                        <td colspan="8">No standard curricula</td>
                     </tr>
 
                 {% endif %}

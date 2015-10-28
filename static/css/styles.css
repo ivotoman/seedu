@@ -9,6 +9,10 @@ h1 {
   color:#DDCCEE;
 }
 
+textarea {
+  margin-right: 10px;
+}
+
 .lead {
 	color:#DDCCEE;
 }
@@ -45,4 +49,8 @@ h1 {
 a:hover, .nodecoration {
     color: #333;
     text-decoration: none;
+}
+
+.panel {
+  border-right: 1px solid #eeeeee;
 }

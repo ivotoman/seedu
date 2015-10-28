@@ -1,0 +1,104 @@
+{% extends "admin/base-standard-curricula.html" %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-xs-12 text-left">
+            <h1>{{ curriculum_name }} in detail</h1>
+        </div>    
+    </div>
+    <!-- /row -->
+
+    <div class="row">
+        <div class="col-xs-12">
+            <hr>
+        </div>
+    </div>
+    <!-- /row -->
+
+
+
+    <div class="row">
+        
+        <div class="col-xs-12">
+            <div class="row"> <!-- /curriculum grade row -->
+
+                <div class="col-xs-12">
+                    <strong>Grade:</strong> {{grade}}
+                </div>
+
+            </div>  <!-- /curriculum grade row -->
+            <div class="row"> <!-- /curriculum description row -->
+
+                <div class="col-xs-12">
+                    <strong>Curriculum description: </strong> {{curriculum_description}}
+                </div>
+
+            </div>  <!-- /curriculum description row -->
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="row"> <!-- /courses row -->
+
+                <div class="col-xs-12">
+                    <br>
+                    <br>
+                    <strong>Courses:</strong>  
+                    {% if courses %}
+                    {% for course in courses %}
+                    <hr>
+                        <div class="row">               
+                            <div class="col-xs-3">
+                                {{course.name}}
+                            </div>
+
+                            <div class="col-xs-9">
+                                {% if course.topics %}
+                                {% for topic in course.topics %}
+                                    <div class="row">               
+                                        <div class="col-xs-5">
+                                            {{ topic.name }}
+                                        </div>  
+                                        <div class="col-xs-7">
+                                            {% if topic.subtopics %}
+                                            {% for subtopic in topic.subtopics %}
+                                            <div class="row">               
+                                                <div class="col-xs-12">
+                                                    {{ subtopic.name }}
+                                                </div>  
+                                            </div>  
+                                            {% endfor %}
+                                            {% endif %}
+                                        </div>  
+                                    </div>  
+                                <hr>
+                                {% endfor %}
+                                {% endif %}
+                            </div>  
+                        </div>  
+
+                    {% endfor %}
+
+                    {% else %}
+                        no courses available
+                    {% endif %}
+
+                    
+                </div>
+
+            </div>  <!-- /curriculum grade row -->
+        </div>
+    </div>
+        
+    
+
+    </div>
+
+
+<script type="text/javascript">
+hideCourses();
+</script>
+
+{% endblock %}

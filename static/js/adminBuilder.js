@@ -1,9 +1,71 @@
+////////////////////////////////////////////////
+////////////////////////////////////////////////
+/////////////new standard curricula/////////////
+////////////////////////////////////////////////
+////////////////////////////////////////////////
+function hideCourses () {
+    var courses = $('.available-courses')
+    var selected = $("#select-grade").val()
+    for (var i = courses.length - 1; i >= 0; i--) {
+        if ($(courses[i]).hasClass(selected)) {    
+            $(courses[i]).show()
+            if ($(courses[i]).hasClass("jinja")) {
+                $(courses[i]).find('input').prop('checked', true); // Checks it    
+            };
+                
+        } else {
+            $(courses[i]).hide()
+            $(courses[i]).find('input').prop('checked', false); // Unchecks it
+        };
+    }
+};
+
+$(function() {
+    console.log("$('#submit-new-standard-curricula'): " + $('#submit-new-standard-curricula'))
+    $('#submit-new-standard-curricula').click(function(event) {
+        var checkedCount = $('input[class="courses"]:checked').length
+        console.log("checkedCount: " + checkedCount)
+        if (checkedCount == 0) {
+            console.log("count == 0")
+            event.preventDefault(); //change return to false together with event.preventDefault(); in order to prevent submit    
+            $('#no-checkbox').show();
+            return false; //change return to false together with event.preventDefault(); in order to prevent submit
+        } else {
+            $('#no-checkbox').hide();
+        };
+        return true; //change return to false together with event.preventDefault(); in order to prevent submit
+    });
+});
+
+
+// $(function() {
+//     $('#submit-new-standard-curricula').click(function(event) {     
+//         var checkedCount = ($('input[class="gender"]:checked').length))        
+//         if (checkedCount) == 0 {
+//             event.preventDefault(); //change return to false together with event.preventDefault(); in order to prevent submit    
+//         };
+        
+//         var content = JSON.stringify($('form').serializeObject());
+//         $('#result').text(content);
+
+//         $.ajax({
+//             type : "PUT",
+//             url : '/admin/courses/new'  ,
+//             data: JSON.stringify(content, null, '\t'),
+//             contentType: 'application/json;charset=UTF-8'
+//         });
+//     return true; //change return to false together with event.preventDefault(); in order to prevent submit
+//   })   
+// });
+
+
+////////////////////////////////////////////////
+////////////////////////////////////////////////
+////////////////////courses/////////////////////
+////////////////////////////////////////////////
+////////////////////////////////////////////////
 var topicCounter = 2
 var subtopicCounter = 2
-
-
-
-
 $( 'body' ).click(function(event) {
 
 	var element = $(event.target);
@@ -48,6 +110,20 @@ $( 'body' ).click(function(event) {
 		    data: JSON.stringify(content, null, '\t'),
 		    contentType: 'application/json;charset=UTF-8'
 		});
+    } else if (element.attr("id") == "submit-new-course") {
+        console.log("submitNewCourse")
+        // event.preventDefault(); //change return to false together with event.preventDefault(); in order to prevent submit
+        var content = JSON.stringify($('form').serializeObject());
+        $('#result').text(content);
+        console.log(content)
+        $.ajax({
+            type : "PUT",
+            url : '/admin/courses/new'  ,
+            data: JSON.stringify(content, null, '\t'),
+            contentType: 'application/json;charset=UTF-8'
+        });
+        return true; //change return to false together with event.preventDefault(); in order to prevent submit
+        // return false; //change return to false together with event.preventDefault(); in order to prevent submit
     }; 
 });
 
@@ -120,39 +196,38 @@ $( 'body' ).click(function(event) {
     };
 })(jQuery);
 
-$(function() {
-    $('submit-new-course').submit(function(event) {
-        // event.preventDefault(); //change return to false together with event.preventDefault(); in order to prevent submit
-        var content = JSON.stringify($('form').serializeObject());
-        $('#result').text(content);
+// function submitNewCourse () {
+//     console.log("submitNewCourse")
+//     // event.preventDefault(); //change return to false together with event.preventDefault(); in order to prevent submit
+//     var content = JSON.stringify($('form').serializeObject());
+//     $('#result').text(content);
+//     console.log(content)
+//     $.ajax({
+//         type : "PUT",
+//         url : '/admin/courses/new'  ,
+//         data: JSON.stringify(content, null, '\t'),
+//         contentType: 'application/json;charset=UTF-8'
+//     });
+//     return true; //change return to false together with event.preventDefault(); in order to prevent submit
+// };
 
-        $.ajax({
-		    type : "PUT",
-		    url : '/admin/courses/new'	,
-		    data: JSON.stringify(content, null, '\t'),
-		    contentType: 'application/json;charset=UTF-8'
-		});
-        return true; //change return to false together with event.preventDefault(); in order to prevent submit
-    });
-});
+
 
 // $(function() {
-//     $('submit-edit-course').submit(function(event) {
-//         event.preventDefault(); //change return to false together with event.preventDefault(); in order to prevent submit
+//     $('submit-new-course').submit(function(event) {
+//         // event.preventDefault(); //change return to false together with event.preventDefault(); in order to prevent submit
 //         var content = JSON.stringify($('form').serializeObject());
 //         $('#result').text(content);
-//         var pathname = window.location.pathname
+
 //         $.ajax({
 // 		    type : "PUT",
-// 		    url : pathname	,
+// 		    url : '/admin/courses/new'	,
 // 		    data: JSON.stringify(content, null, '\t'),
 // 		    contentType: 'application/json;charset=UTF-8'
 // 		});
-//         return false; //change return to false together with event.preventDefault(); in order to prevent submit
+//         return true; //change return to false together with event.preventDefault(); in order to prevent submit
 //     });
 // });
-
-
 
 
 function confirmAction(){

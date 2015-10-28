@@ -15,21 +15,10 @@ from sqlalchemy.orm.exc import MultipleResultsFound
 ###################### CONFIGURATION ##########################
 ###############################################################
 ###############################################################
-
+# this article shows the basics of postgre setup http://blog.sahildiwan.com/posts/flask-and-postgresql-app-deployed-on-heroku/
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/pre-registration'
 db = SQLAlchemy(app)
-
-
-# from flask import Flask, render_template, request
-# from flask.ext.sqlalchemy import SQLAlchemy
-
-# from flask.ext.heroku import Heroku
-
-# app = Flask(__name__)
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/pre-registration'
-# heroku = Heroku(app)
-# db = SQLAlchemy(app)
 
 
 
@@ -166,7 +155,7 @@ class User(db.Model):
 
 ###############################################################
 ###############################################################
-###################### CONTROLLERS ############################
+#################### OUT CONTROLLERS ##########################
 ###############################################################
 ###############################################################
 # Set "homepage" to index.html
@@ -241,7 +230,11 @@ def register():
 
     return render_template('out/index.html')
 
-
+###############################################################
+###############################################################
+################### ADMIN CONTROLLERS #########################
+###############################################################
+###############################################################
 @app.route('/admin', methods=['GET'])
 def admin():
     return render_template('admin/home/index.html')
@@ -264,6 +257,7 @@ def new_course():
 
         # load json otherwise it will be unicode instead of a dictionary         
         content = json.loads(request.get_json())#["course"]
+        print "content ", request.get_json()
 
         if not content:
             print "bad response format"
@@ -275,7 +269,6 @@ def new_course():
             new_course = Course(name = course_name, grade = course_grade, description = course_description)
             db.session.add(new_course)
             db.session.commit()
-            print "new_course", new_course
 
             # iterating through keys and values of course
             for kc, vc in content["course"].items():    
@@ -297,7 +290,12 @@ def new_course():
                             subtopic_order = vt["subtopic_order"]
                             subtopic_description = vt["subtopic_description"]
                             subtopic_year = vt["subtopic_year"]
+
                             subtopic_hours = vt["subtopic_hours"]
+                            print "vt: ", vt
+                            print "subtopic_year: ", subtopic_year
+                            print "subtopic_hours: ", subtopic_hours
+
                             new_subtopic = Subtopic(name = subtopic_name, 
                                 description = subtopic_description, 
                                 subtopic_order = subtopic_order, 
@@ -314,7 +312,7 @@ def new_course():
             write a function, which will revert changes if there has been a problem with creation of any item
             """
             pass
-
+        return True
 
 
     elif request.method == 'POST':   
@@ -344,14 +342,11 @@ def edit_course(course_id):
             course.description = content["course"]["course_description"]
             db.session.add(course)
             db.session.commit()
-            print "content course: ", content["course"]
             # iterating through keys and values of course
             for kc, vc in content["course"].items():    
                 # if any key of the course starts with topic, create a new topic and...
                 if kc.startswith("topic_"):
                     topic = db.session.query(Topic).filter_by(id = kc.split("_")[-1]).one()
-                    print "topic: ", topic
-                    print "kc topic: ", kc
                     topic.name = vc["topic_name"]
                     topic.order = vc["topic_order"]
                     topic.description = vc["topic_description"]
@@ -362,22 +357,14 @@ def edit_course(course_id):
                     for kt, vt in vc.items():
                         # if any key of the topic starts with subtopic, create a new subtopic. Cycle will return to one up (looking for more subtopic, then looking for more topics)
                         if kt.startswith("subtopic_"):
-                            print "kt: ", kt
-                            print 'vt.has_key("subtopic_hours"): ', vt.has_key("subtopic_hours")
                             subtopic = db.session.query(Subtopic).filter_by(id = kt.split("_")[-1]).one()
-                            print "subtopic: ", subtopic
-                            print "kt subtopic: ", kt
                             subtopic.name = vt["subtopic_name"]
                             subtopic.order = vt["subtopic_order"]
                             subtopic.description = vt["subtopic_description"]
                             if vt.has_key("subtopic_year"):
                                 subtopic.year = vt["subtopic_year"]
-                                print 'subtopic.year: ', subtopic.year 
-                                print 'vt["subtopic_year"]: ', vt["subtopic_year"]
                             if vt.has_key("subtopic_hours"):
                                 subtopic.hours = vt["subtopic_hours"]
-                                print 'subtopic.hours: ', subtopic.hours 
-                                print 'vt["subtopic_hours"]: ', vt["subtopic_hours"]
                             db.session.add(subtopic)
                             db.session.commit()
 
@@ -390,6 +377,10 @@ def edit_course(course_id):
 
 
     course = db.session.query(Course).filter_by(id = course_id).one()
+    for topic in course.topics:
+        for subtopic in topic.subtopics:
+            print "subtopic.hours: ", subtopic.hours
+            print "subtopic.year: ", subtopic.year
     return render_template('admin/courses/edit.html', course = course)
 
 @app.route('/admin/courses/<int:course_id>/delete', methods=['GET'])
@@ -398,6 +389,144 @@ def delete_course(course_id):
     db.session.delete(course)
     db.session.commit()
     return redirect("/admin/courses", code=302)
+
+
+###############################################################
+################### STANDARD CURRICULA ########################
+###############################################################
+
+
+@app.route('/admin/standard-curricula', methods=['GET'])
+def standard_curricula():
+    # try:  
+        standardcurricula = db.session.query(StandardCurriculum).all()
+        print "standardcurricula", repr(standardcurricula)
+        for curriculum in standardcurricula:
+            print "curriculum.name", curriculum.name
+            print "curriculum.courses: ", curriculum.courses
+        return render_template('admin/standard-curricula/all.html', standardcurricula = standardcurricula)
+    # except:
+    #     return "ooops, what happened here?"
+    #     # Deal with it
+
+@app.route('/admin/standard-curricula/new', methods=['GET', 'POST'])
+def new_standard_curriculum():
+    name = ""
+    grade = ""
+    description = ""
+    selected_courses = ""
+
+    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    # i am not sure if this construct will reflect latter updates of the variables
+    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    params = dict(curriculum_name = name,
+                grade = grade,
+                curriculum_description = description) 
+
+    if request.method == 'POST':   
+        have_error = False
+        name = request.form['curriculum_name']
+        grade = request.form['curriculum_grade']
+        description = request.form['curriculum_description']
+        selected_courses = request.form.getlist('course')
+        courses = []
+
+        for course_id in selected_courses:
+            course = db.session.query(Course).filter_by(id = course_id).one()
+            courses.append(course)
+            if course.grade != grade:
+                have_error = True
+                params['wrong_course_error'] = "At least one selected course doesn't belong to the curriculum's grade"
+
+        # any_selected = bool(selected)
+        if have_error:
+            return render_template('admin/standard-curricula/new.html', **params)
+        else:
+            new_standard_curriculum = StandardCurriculum(name = name, grade = grade, description = description)
+            
+            for course in courses:
+                #Add an association
+                new_standard_curriculum.courses.append(course)
+            db.session.add(new_standard_curriculum)
+            db.session.commit()
+
+        return redirect("/admin/standard-curricula", code=302)
+
+    elif request.method == 'GET':
+        params["courses"] = db.session.query(Course).all()
+        return render_template('admin/standard-curricula/new.html', **params)
+
+@app.route('/admin/standard-curricula/<int:standardcurriculum_id>', methods=['GET'])
+def view_standard_curriculum(standardcurriculum_id):
+    standardcurriculum = db.session.query(StandardCurriculum).filter_by(id = standardcurriculum_id).one()
+    existing_courses = standardcurriculum.courses
+
+    params = dict(curriculum_name = standardcurriculum.name,
+                    grade = standardcurriculum.grade,
+                    curriculum_description = standardcurriculum.description,
+                    standardcurriculum_id = standardcurriculum.id,
+                    courses = existing_courses) 
+    
+    return render_template('admin/standard-curricula/view.html', **params)
+
+@app.route('/admin/standard-curricula/<int:standardcurriculum_id>/edit', methods=['GET', 'POST'])
+def edit_standard_curriculum(standardcurriculum_id):
+    name = ""
+    grade = ""
+    description = ""
+    selected_courses = ""
+
+    standardcurriculum = db.session.query(StandardCurriculum).filter_by(id = standardcurriculum_id).one()
+    existing_courses = standardcurriculum.courses
+
+    params = dict(curriculum_name = standardcurriculum.name,
+                    grade = standardcurriculum.grade,
+                    curriculum_description = standardcurriculum.description,
+                    standardcurriculum_id = standardcurriculum.id,
+                    couse = existing_courses) 
+    if request.method == 'POST':  
+        have_error = False
+
+        name = request.form['curriculum_name']
+        grade = request.form['curriculum_grade']
+        description = request.form['curriculum_description']
+        selected_courses = request.form.getlist('course')
+        courses = []
+
+        for course_id in selected_courses:
+            course = db.session.query(Course).filter_by(id = course_id).one()
+            courses.append(course)
+            if course.grade != grade:
+                have_error = True
+                params['wrong_course_error'] = "At least one selected course doesn't belong to the curriculum's grade"
+        
+        if have_error:
+            return render_template('admin/standard-curricula/edit.html', **params)
+        else:
+            standardcurriculum.name = name
+            standardcurriculum.grade = grade
+            standardcurriculum.description = description
+
+            # editing multiple many-to-many relationships: http://stackoverflow.com/questions/7888900/how-to-remove-all-items-from-many-to-many-collection-in-sqlalchemy
+            standardcurriculum.courses[:] = courses
+            db.session.add(standardcurriculum)
+            db.session.commit()
+        return redirect("/admin/standard-curricula", code=302)
+
+    else:# request.method == 'GET':  
+        params["courses"] = db.session.query(Course).all()
+        params["selected_courses"] = standardcurriculum.courses
+        print 'params["selected_courses"]', params["selected_courses"]
+        print 'params["courses"]', params["courses"]
+        
+        return render_template('admin/standard-curricula/edit.html', **params)
+
+@app.route('/admin/standard-curricula/<int:standardcurriculum_id>/delete', methods=['GET'])
+def delete_standard_curriculum(standardcurriculum_id):
+    standardcurriculum = db.session.query(StandardCurriculum).filter_by(id = standardcurriculum_id).one()
+    db.session.delete(standardcurriculum)
+    db.session.commit()
+    return redirect("/admin/standard-curricula", code=302)
 
 
 ###############################################################

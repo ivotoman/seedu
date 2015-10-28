@@ -1,0 +1,104 @@
+{% extends "admin/base-standard-curricula.html" %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-xs-12 text-left">
+            <h1>Edit the standard curriculum</h1>
+        </div>    
+    </div>
+    <!-- /row -->
+
+    <div class="row">
+        <div class="col-xs-12">
+            <hr>
+        </div>
+    </div>
+    <!-- /row -->
+
+
+
+<form class="form-horizontal" action="{{ url_for('edit_standard_curriculum', standardcurriculum_id = standardcurriculum_id)}}" method="POST" id="edit-standard-curriculum"> 
+
+    <div class="row">
+        <div class="col-xs-6">
+            <div class="row"> <!-- curriculum name row -->
+                <div class="col-xs-12">
+                    <div class="input-group">
+                        <span class="input-group-addon control-label required">Name:</span>
+                        <input type="text" class="form-control" placeholder="Please enter the curriculum name" name="curriculum_name" value="{{curriculum_name}}" required>
+                        <br>
+                    </div>
+                </div>
+            </div>  <!-- /curriculum name row -->
+            <br>
+            <div class="row"> <!-- /curriculum grade row -->
+                <!-- <div class="col-xs-12"> -->
+                    <div class="col-xs-1">
+                    </div>
+                    <div class="col-xs-2">
+                        <label class="control-label col-xs-1">Grade:</label>
+                    </div>
+                    <div class="col-xs-9">
+                        <select class="form-control" id="select-grade" name="curriculum_grade" onchange="hideCourses(this.value);">
+                            <option value="primary" {% if grade == "primary" %} selected{%endif%}>primary</option>
+                            <option value="secondary"{% if grade == "secondary" %} selected{%endif%}>secondary</option>
+                            <option value="high-school"{% if grade == "high-school" %} selected{%endif%}>high-school</option>
+                            <option value="vocational"{% if grade == "vocational" %} selected{%endif%}>vocational</option>
+                            <option value="bachelor"{% if grade == "bachelor" %} selected{%endif%}>bachelor</option>
+                            <option value="master"{% if grade == "master" %} selected{%endif%}>master</option>
+                            <option value="doctoral"{% if grade == "doctoral" %} selected{%endif%}>doctoral</option>
+                            
+                        </select>
+                        <br>
+                    </div>
+                <!-- </div> -->
+            </div>  <!-- /curriculum grade row -->
+            <div class="row"> <!-- /curriculum description row -->
+                <!-- <div class="col-xs-12"> -->
+                    <div class="col-xs-1">
+                    </div>
+                    <div class="col-xs-3">
+                        <label class="control-label">Curriculum description:</label>
+                    </div>
+                    <div class="col-xs-8">
+                        <div class="form-group">
+                            
+                            <textarea rows="3" class="form-control" name="curriculum_description" placeholder="Please write a bried description of the curriculum here">{{curriculum_description}}</textarea>
+                        </div>    
+                    </div>
+                <!-- </div> -->
+            </div>  <!-- /curriculum description row -->
+        </div>
+        <div class="col-xs-1 panel">
+
+        </div>
+        <div class="col-xs-5">
+            <h4>Assign courses to the curriculum</h4>
+            <div class="alert alert-danger" id="no-checkbox" style="display: none;">
+                <!-- <a href="#" class="close" data-dismiss="alert">&times;</a> -->
+                <strong>Warning!</strong> At least one course must be selected.
+            </div>
+            {% if courses %}
+                {% for course in courses %}
+                <div class="checkbox available-courses {{course.grade}} {% if course in selected_courses %} jinja {% endif %}">
+                  <label>
+                    <input type="checkbox" class="courses" name="course" value="{{course.id}}">
+                        {{course.name}}
+                  </label>
+                </div>
+                {% endfor %}
+            {% else %}
+                no courses available
+            {% endif %}
+        </div>
+    </div>
+
+<input type="submit" class="btn btn-primary pull-left" id="submit-new-standard-curricula">
+</form>
+
+
+<script type="text/javascript">
+hideCourses();
+</script>
+
+{% endblock %}

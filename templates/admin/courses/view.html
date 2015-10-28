@@ -145,14 +145,14 @@
                                 <div class="col-xs-6">
                                     <div class="input-group">
                                         <span class="input-group-addon control-label">Year:</span>
-                                        <input type="number" class="form-control required" placeholder="Year/grade when it will be taught" name="course[topic_1][subtopic_1][subtopic_year]">
+                                        <input type="number" class="form-control required" value="{{subtopic.year}}" placeholder="Year/grade when it will be taught" name="course[topic_1][subtopic_1][subtopic_year]">
                                     </div> 
                                 </div>
 
                                 <div class="col-xs-5">
                                     <div class="input-group">
                                         <span class="input-group-addon control-label"># hours:</span>
-                                        <input type="number" step="0.01" class="form-control required" placeholder="Hours spent on it" name="course[topic_1][subtopic_1][subtopic_hours]">
+                                        <input type="number" step="0.01" class="form-control required" value="{{subtopic.hours}}" placeholder="Hours spent on it" name="course[topic_1][subtopic_1][subtopic_hours]">
                                     </div>
                                     
                                 </div>
