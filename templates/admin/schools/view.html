@@ -1,0 +1,56 @@
+{% extends "admin/base-schools.html" %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-xs-12 text-left">
+            <h1>{{ school.name }} in detail</h1>
+        </div>    
+    </div>
+    <!-- /row -->
+
+    <div class="row">
+        <div class="col-xs-12">
+            <hr>
+        </div>
+    </div>
+    <!-- /row -->
+
+
+
+    <div class="row"> <!-- school info row -->
+        <div class="col-xs-6"> <!-- address panel -->
+            <div class="row"> 
+                <div class="col-xs-12">
+                    <strong>Street:</strong> {{school.street}}
+                </div>
+            </div> 
+
+            <div class="row"> 
+                <div class="col-xs-12">
+                    <strong>City (postcode): </strong> {{school.city}}, ({{school.postcode}})
+                </div>
+            </div>  
+
+            <div class="row"> 
+                <div class="col-xs-12">
+                    <strong>Region, country: </strong> {{school.state}}, {{school.country}}
+                </div>
+            </div>
+        </div><!-- address panel -->
+
+        <div class="col-xs-6"> <!-- contacts panel -->
+            <div class="row"> 
+                <div class="col-xs-12">
+                    <strong>Phone:</strong> {{school.phone}}
+                </div>
+            </div> 
+
+            <div class="row"> 
+                <div class="col-xs-12">
+                    <strong>Web: </strong> <a href="http://{{school.web}}">{{school.web}}</a>
+                </div>
+            </div>  
+        </div><!-- contacts panel -->
+    </div><!-- school info row -->
+
+{% endblock %}

@@ -37,12 +37,9 @@ function hideCoursesNew () {
 
 
 $(function() {
-    console.log("$('#submit-new-standard-curricula'): " + $('#submit-new-standard-curricula'))
     $('#submit-new-standard-curricula').click(function(event) {
         var checkedCount = $('input[class="courses"]:checked').length
-        console.log("checkedCount: " + checkedCount)
         if (checkedCount == 0) {
-            console.log("count == 0")
             event.preventDefault(); //change return to false together with event.preventDefault(); in order to prevent submit    
             $('#no-checkbox').show();
             return false; //change return to false together with event.preventDefault(); in order to prevent submit
@@ -108,7 +105,6 @@ $( 'body' ).click(function(event) {
 
     } else if (element.attr("id") == "subtopic") {
 		var topic_id = element.parent().parent().parent().attr("id");
-		console.log(topic_id);
 		var topic = HTMLSubtopicRow.replace(/(%topicdata%)/g, topic_id);
 		var newSubtopic = $(topic.replace(/(%subtopicdata%)/g, subtopicCounter));
 		subtopicCounter ++;
@@ -127,7 +123,6 @@ $( 'body' ).click(function(event) {
 		    contentType: 'application/json;charset=UTF-8'
 		});
     } else if (element.attr("id") == "submit-new-course") {
-        console.log("submitNewCourse")
         // event.preventDefault(); //change return to false together with event.preventDefault(); in order to prevent submit
         var content = JSON.stringify($('form').serializeObject());
         $('#result').text(content);
@@ -250,7 +245,6 @@ function confirmAction(){
       var confirmed = confirm("Are you sure? This will remove this entry forever.");
       return confirmed;
 }
-
 
 
 

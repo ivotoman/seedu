@@ -7,6 +7,7 @@ import json
 
 from flask import Flask, render_template, request, abort, json, jsonify, redirect
 from flask.ext.sqlalchemy import SQLAlchemy
+from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm.exc import MultipleResultsFound
 
@@ -16,11 +17,48 @@ from sqlalchemy.orm.exc import MultipleResultsFound
 ###############################################################
 ###############################################################
 # this article shows the basics of postgre setup http://blog.sahildiwan.com/posts/flask-and-postgresql-app-deployed-on-heroku/
+# good article about declaring data-types in sqlalchemy: https://pythonhosted.org/Flask-SQLAlchemy/models.html
+# sqlalchemy postgresql data types http://docs.sqlalchemy.org/en/rel_0_9/dialects/postgresql.html#postgresql-data-types
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/pre-registration'
 db = SQLAlchemy(app)
 
 
+
+curricula_schools=db.Table('curricula_schools',                            
+                             db.Column('curriculum_id', db.Integer,db.ForeignKey('curricula.id'), nullable=False),
+                             db.Column('school_id',db.Integer,db.ForeignKey('schools.id'),nullable=False),
+                             db.PrimaryKeyConstraint('curriculum_id', 'school_id') )
+
+class School(db.Model):
+    """docstring for School"""
+    __tablename__ = 'schools'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable = False)
+    street = db.Column(db.String(200), nullable = False)
+    city = db.Column(db.String(200), nullable = False)
+    county = db.Column(db.String(200), nullable = False)
+    state = db.Column(db.String(200), nullable = False)
+    postcode = db.Column(db.String(200), nullable = False)
+    country = db.Column(db.String(100), nullable = False)
+    web = db.Column(db.String(200), nullable = True, default="not available")
+    phone = db.Column(db.String(20), nullable = True, default="not available")
+    curricula = db.relationship("Curriculum", secondary=curricula_schools, backref='schools')
+
+    def __init__(self, name, street, city, state, postcode, country, web, phone, county = "n/a"):
+        self.name = name 
+        self.street = street
+        self.city = city 
+        self.county = county
+        self.state = state
+        self.postcode = postcode
+        self.country = country
+        self.web = web 
+        self.phone = phone
+        
+    def __repr__(self):
+        # return '<E-mail %r>' % self.email
+        return '<school_id {}>'.format(self.id)
 
 
 # Create our database model
@@ -30,13 +68,13 @@ standardcurricula_courses=db.Table('standardcurricula_courses',
                              db.Column('course_id',db.Integer,db.ForeignKey('courses.id'),nullable=False),
                              db.PrimaryKeyConstraint('standardcurriculum_id', 'course_id') )
 
-
 class StandardCurriculum(db.Model):
     __tablename__ = 'standardCurricula'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique= True, nullable = False)
     description = db.Column(db.Text, nullable = True)
     grade = db.Column(db.String(100), nullable = False)
+    curricula = db.relationship("Curriculum", backref="standardcurriculum")
     
 
     def __init__(self, name, description, grade):
@@ -46,15 +84,38 @@ class StandardCurriculum(db.Model):
 
     def __repr__(self):
         # return '<E-mail %r>' % self.email
-        return '<id {}>'.format(self.id)
+        return '<standardcurriculum_id {}>'.format(self.id)
 
-# # used for customizing order and inclusion of courses, topics and subtopics
-# class SchoolCurriculum(StandardCurriculum):
-#     __tablename__ = 'schoolCurricula'
-#     # This id below should reference StandardCurriculum. Hence, define it as foreign key. 
-#     # Source: http://stackoverflow.com/questions/25189017/tablemodel-inheritance-with-flask-sqlalchemy
-#     id = db.Column(db.Integer, ForeignKey('standardcurriculum.id'), primary_key=True)
-#     current_balance = db.Column(db.Float)
+# used for customizing order and inclusion of courses, topics and subtopics
+class Curriculum(db.Model):
+    __tablename__ = 'curricula'
+    # This id below should reference StandardCurriculum. Hence, define it as foreign key. 
+    # Source: http://stackoverflow.com/questions/25189017/tablemodel-inheritance-with-flask-sqlalchemy
+    # another example of inheritance and method override: http://snipplr.com/view/36330/ 
+    id = db.Column(db.Integer, primary_key=True)
+    standardcurriculum = db.Column(db.Integer, db.ForeignKey('standardcurriculum.id'))
+    # using JSON column with postgresql http://stackoverflow.com/questions/23878070/using-json-type-with-flask-sqlalchemy-postgresql
+    ordered_subtopics = db.Column(JSON)
+#     ordered_subtopics = {"year_1" : {
+#             "course_id" : { 
+#                 "1" : "subtopic_id",
+#                 "2" : "subtopic_id"
+#             },
+#             "course_id" : {
+#                 "1" : "subtopic_id",
+#                 "2" : "subtopic_id"   
+#             }
+#         }
+#     }
+
+    def __init__(self, standardcurriculum, customization_table):
+        self.standardcurriculum = standardcurriculum.id
+        self.customization_table = customization_table
+
+
+    def __repr__(self):
+        # return '<E-mail %r>' % self.email
+        return '<curriculum_id {}>'.format(self.id)
 
 # class CourseGroup(object):
 #     """
@@ -88,7 +149,7 @@ class Course(db.Model):
 
     def __repr__(self):
         # return '<E-mail %r>' % self.email
-        return '<id {}>'.format(self.id)
+        return '<course_id {}>'.format(self.id)
 
 class Topic(db.Model):
     __tablename__ = 'topics'
@@ -107,7 +168,7 @@ class Topic(db.Model):
 
     def __repr__(self):
         # return '<E-mail %r>' % self.email
-        return '<id {}>'.format(self.id)
+        return '<topic_id {}>'.format(self.id)
 
 class Subtopic(db.Model):
     __tablename__ = 'subtopics'
@@ -129,8 +190,9 @@ class Subtopic(db.Model):
 
     def __repr__(self):
         # return '<E-mail %r>' % self.email
-        return '<id {}>'.format(self.id)
+        return '<subtopic_id {}>'.format(self.id)
 
+# flask module for user management: https://pythonhosted.org/Flask-User/customization.html
 class User(db.Model):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
@@ -148,7 +210,7 @@ class User(db.Model):
 
     def __repr__(self):
         # return '<E-mail %r>' % self.email
-        return '<id {}>'.format(self.id)
+        return '<user_id {}>'.format(self.id)
 
         
 
@@ -162,8 +224,8 @@ class User(db.Model):
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
+        email = request.form['email'].strip()
+        password = request.form['password'].strip()
 
         # Check that email does not already exist (not a great query, but works)
         if email and password:
@@ -180,11 +242,11 @@ def index():
 def register():
     if request.method == 'POST':
         have_error = False
-        email = request.form['email']
-        given_name = request.form['given_name']
-        family_name = request.form['family_name']
-        password = request.form['password']
-        verify = request.form['verify']
+        email = request.form['email'].strip()
+        given_name = request.form['given_name'].strip()
+        family_name = request.form['family_name'].strip()
+        password = request.form['password'].strip()
+        verify = request.form['verify'].strip()
 
         params = dict(email = email,
                 given_name = given_name,
@@ -425,9 +487,9 @@ def new_standard_curriculum():
 
     if request.method == 'POST':   
         have_error = False
-        name = request.form['curriculum_name']
-        grade = request.form['curriculum_grade']
-        description = request.form['curriculum_description']
+        name = request.form['curriculum_name'].strip()
+        grade = request.form['curriculum_grade'].strip()
+        description = request.form['curriculum_description'].strip()
         selected_courses = request.form.getlist('course')
         courses = []
 
@@ -487,9 +549,9 @@ def edit_standard_curriculum(standardcurriculum_id):
     if request.method == 'POST':  
         have_error = False
 
-        name = request.form['curriculum_name']
-        grade = request.form['curriculum_grade']
-        description = request.form['curriculum_description']
+        name = request.form['curriculum_name'].strip()
+        grade = request.form['curriculum_grade'].strip()
+        description = request.form['curriculum_description'].strip()
         selected_courses = request.form.getlist('course')
         courses = []
 
@@ -529,6 +591,131 @@ def delete_standard_curriculum(standardcurriculum_id):
     return redirect("/admin/standard-curricula", code=302)
 
 
+###############################################################
+########################## SCHOOLS ############################
+###############################################################
+
+@app.route('/admin/schools', methods=['GET'])
+def schools():
+    # try:  
+    schools = db.session.query(School).all()
+    print "schools", repr(schools)
+    return render_template('admin/schools/all.html', schools = schools)
+    # except:
+    #     return "ooops, what happened here?"
+    #     # Deal with it
+
+
+@app.route('/admin/schools/new', methods=['GET', 'POST'])
+def new_school():
+    if request.method == 'GET':
+        return render_template('admin/schools/new.html')
+        # a list of countries/regions/cities http://stackoverflow.com/questions/6659269/api-or-database-to-load-data-for-country-state-province-region-and-city-select
+        # http://www.freeformatter.com/iso-country-list-html-select.html
+    
+    if request.method == 'POST':
+        name = request.form['school_name'].strip()
+        street = request.form['school_street'].strip()
+        city = request.form['school_city'].strip()
+        postcode = request.form['school_postcode'].strip()
+        state = request.form['school_region'].strip()
+        country = request.form['school_country'].strip()
+        web = request.form['school_web'].strip()
+        phone = request.form['school_phone'].strip()
+
+        if name and street and city and postcode and state and country:
+            school = School(name = name, street = street, city = city, postcode = postcode, state = state, country = country, web = web, phone = phone)
+            db.session.add(school)
+            db.session.commit()
+            return redirect("/admin/schools", code=302)
+        else:
+            return render_template('admin/schools/all.html', error = True, school_name = name, school_street = street, school_city = city, school_postcode = postcode, school_region = state, school_country = country, school_web = web, school_phone = phone)            
+
+
+@app.route('/admin/schools/<int:school_id>/edit', methods=['GET', 'POST'])
+def edit_school(school_id):
+    print "school_id", school_id
+    school = db.session.query(School).filter_by(id = school_id).one()
+
+    if request.method == 'GET': 
+        return render_template('admin/schools/edit.html', school = school)
+    if request.method == 'POST':
+        name = request.form['school_name'].strip()
+        street = request.form['school_street'].strip()
+        city = request.form['school_city'].strip()
+        postcode = request.form['school_postcode'].strip()
+        state = request.form['school_region'].strip()
+        country = request.form['school_country'].strip()
+        web = request.form['school_web'].strip()
+        phone = request.form['school_phone'].strip()
+
+        if name and street and city and postcode and state and country:
+            school.name = name
+            school.street = street
+            school.city = city
+            school.postcode = postcode
+            school.state = state
+            school.country = country
+            school.web = web
+            school.phone = phone
+
+            db.session.add(school)
+            db.session.commit()
+            return redirect("/admin/schools", code=302)
+        else:
+            return render_template('admin/schools/all.html', error = True, school_name = name, school_street = street, school_city = city, school_postcode = postcode, school_region = state, school_country = country, school_web = web, school_phone = phone)            
+
+@app.route('/admin/schools/<int:school_id>/', methods=['GET'])
+def view_school(school_id):
+    school = db.session.query(School).filter_by(id = school_id).one()
+    return render_template('admin/schools/view.html', school = school)
+
+@app.route('/admin/schools/<int:school_id>/delete', methods=['GET'])
+def delete_school(school_id):
+    school = db.session.query(School).filter_by(id = school_id).one()
+    db.session.delete(school)
+    db.session.commit()
+    return redirect("/admin/schools", code=302)
+
+
+
+
+###############################################################
+##################### SCHOOL CURRICULA ########################
+###############################################################
+
+# @app.route('/admin/', methods=['GET'])
+# def schools():
+    # json = {standardcurriculum.id : {}}
+
+    #     {"standardcurriculum_id" : {
+    #         "course_id_1" : {
+    #             "topic_id_1" : {
+    #                 "subtopic_id_1" : {
+    #                     "order" : 1,
+    #                     "year" : 1
+    #                 },
+    #                 "subtopic_id_2" : {
+    #                     "order" : 1,
+    #                     "year" : 1
+    #                 }
+    #             }
+    #         },
+    #         "course_id_1" : {}
+    #     }}
+
+    #     curriculum.customization_table[standardcurriculum.id][course.id][topic.id][subtopic.id]['order']
+    #     curriculum.customization_table[standardcurriculum.id][course.id][topic.id][subtopic.id]['year']
+    #     for course in standardcurriculum.courses: 
+    #         json[standardcurriculum.id] = {course.id : {}}
+    #         for topic in course.topics:
+    #             json[standardcurriculum.id][course.id] = {topic.id : {}}
+    #             for subtopic in topic.subtopics:
+    #                 json[standardcurriculum.id][course.id][topic.id] = {subtopic.id : {"order" : custom_order, "year" : custom_year}}
+    #                 ordered_subtopics[custom_year][course.id][custom_order] = subtopic.id
+    #                 # json[standardcurriculum.id] = {course.id : {topic.id : {subtopic.id : {"order" : custom_order, "year" : custom_year}}}}
+    #     json[standardcurriculum.id][course.id][topic.id][subtopic.id]["order"] = custom_order
+    #     json[standardcurriculum.id][course.id][topic.id][subtopic.id]["order"] = custom_year
 ###############################################################
 ###############################################################
 #################### SUPPORT METHODS ##########################
