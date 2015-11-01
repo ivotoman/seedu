@@ -54,7 +54,7 @@
                 </div>
                 <div class="col-xs-11">
                     <div class="form-group">
-                        <label class="control-label col-xs-1" for="course_description">Description:</label>
+                        <label class="control-label" for="course_description">Description:</label>
                         <textarea rows="2" class="form-control required" name="course[course_description]" placeholder="Please write a bried description of the course here">{{course.description}}</textarea>
                         
                     </div>    
@@ -202,8 +202,11 @@
 <input type="submit" class="btn btn-primary pull-left" id="submit-edit-course">
 </form>
 
-<h2>JSON</h2>
-<pre id="result">
-</pre>
+<script type="text/javascript">
+$('textarea').each(function(){
+    $(this).val($(this).val().trim());
+    console.log($(this).val())
+});
+</script>
 
 {% endblock %}

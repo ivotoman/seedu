@@ -1,0 +1,81 @@
+{% extends "admin/base-schools.html" %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-xs-12 text-left">
+            <h1>Customize a new curriculum</h1>
+        </div>    
+    </div>
+    <!-- /row -->
+
+    <div class="row">
+        <div class="col-xs-12">
+            <hr>
+        </div>
+    </div>
+    <!-- /row -->
+
+
+
+<form class="form-horizontal" action="{{ url_for('new_curriculum', school_id = school.id) }}" method="POST" id="new-curriculum"> 
+
+    <div class="row">
+        <div class="col-xs-3">
+            <div class="row"> <!-- /curriculum selection row -->
+
+                    <div class="col-xs-12">
+                        <h4>Choose from standard curricula:<h4><br>
+                        
+                        <select class="form-control" id="select-standard-curriculum" name="standard_curriculum" onchange="hideCoursesNewCurriculum();">
+                            {% for standardcurriculum in standardcurricula %}
+                                <option class="" value="{{standardcurriculum.id}}">{{standardcurriculum.grade}}-{{standardcurriculum.name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+            </div>  <!-- /curriculum selection row -->
+        </div>
+        <!-- <div class="col-xs-1">
+
+        </div> -->
+        <div class="col-xs-9">
+            <h4>Choose courses which will be included to this curriculum</h4>
+            <div class="alert alert-danger" id="no-checkbox" style="display: none;">
+                <strong>Warning!</strong> At least one course must be selected.
+            </div>
+
+            {% if courses %}
+                {% for course in courses %}
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <div class="checkbox available-courses {%for standardcurriculum in course.standardCurricula%}{{ standardcurriculum.id }} {% endfor %}">
+                              <label>
+                                <input type="checkbox" class="courses" name="course" value="{{course.id}}" >
+                                    <strong>{{course.name}}</strong> {% if course.description|length > 0 %}|   Description: {{course.description|truncate(50)}}{% endif %}
+                              </label>
+                            </div>
+                        </div>
+
+                        <!-- <div class="col-xs-7">
+
+                        </div> -->
+                    </div>
+            
+                
+                {% endfor %}
+            {% else %}
+                no courses available
+            {% endif %}
+        </div>
+    </div>
+
+<br>
+<input type="submit" class="btn btn-primary pull-right" id="submit-new-standard-curricula" value="Continue to course customization">
+</form>
+
+
+<script type="text/javascript">
+hideCoursesNewCurriculum();
+</script>
+
+{% endblock %}

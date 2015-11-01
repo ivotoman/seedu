@@ -22,7 +22,7 @@ function hideCoursesEdit () {
 
 function hideCoursesNew () {
     var courses = $('.available-courses')
-    var selected = $("#select-grade").val()
+    var standardCurriculum = $("#select-grade").val()
     for (var i = courses.length - 1; i >= 0; i--) {
         if ($(courses[i]).hasClass(selected)) {    
             $(courses[i]).show()
@@ -33,8 +33,6 @@ function hideCoursesNew () {
         };
     }
 };
-
-
 
 $(function() {
     $('#submit-new-standard-curricula').click(function(event) {
@@ -50,26 +48,40 @@ $(function() {
     });
 });
 
+////////////////////////////////////////////////
+////////////////////////////////////////////////
+//////////////new school curricula//////////////
+////////////////////////////////////////////////
+////////////////////////////////////////////////
+function hideCoursesNewCurriculum () {
+    var courses = $('.available-courses')
+    var selected = $("#select-standard-curriculum").val()
+    for (var i = courses.length - 1; i >= 0; i--) {
+        if ($(courses[i]).hasClass(selected)) {    
+            $(courses[i]).show()
+                $(courses[i]).find('input').prop('checked', true); // Checks it    
+        } else {
+            $(courses[i]).hide()
+            $(courses[i]).find('input').prop('checked', false); // Unchecks it
+        };
+    }
+};
 
-// $(function() {
-//     $('#submit-new-standard-curricula').click(function(event) {     
-//         var checkedCount = ($('input[class="gender"]:checked').length))        
-//         if (checkedCount) == 0 {
-//             event.preventDefault(); //change return to false together with event.preventDefault(); in order to prevent submit    
-//         };
-        
-//         var content = JSON.stringify($('form').serializeObject());
-//         $('#result').text(content);
+function putNewCurriculum () {
+    event.preventDefault(); //change return to false together with event.preventDefault(); in order to prevent submit
+    var content = JSON.stringify($('form').serializeObject());
+    $('#result').text(content);
+    console.log(content)
+    var pathname = window.location.pathname
+    $.ajax({
+        type : "PUT",
+        url : pathname,
+        data: JSON.stringify(content, null, '\t'),
+        contentType: 'application/json;charset=UTF-8'
+    });
+    return true; //change return to false together with event.preventDefault(); in order to prevent submit
+};
 
-//         $.ajax({
-//             type : "PUT",
-//             url : '/admin/courses/new'  ,
-//             data: JSON.stringify(content, null, '\t'),
-//             contentType: 'application/json;charset=UTF-8'
-//         });
-//     return true; //change return to false together with event.preventDefault(); in order to prevent submit
-//   })   
-// });
 
 
 ////////////////////////////////////////////////
@@ -118,7 +130,7 @@ $( 'body' ).click(function(event) {
         var pathname = window.location.pathname
         $.ajax({
 		    type : "POST",
-		    url : pathname	,
+		    url : pathname,
 		    data: JSON.stringify(content, null, '\t'),
 		    contentType: 'application/json;charset=UTF-8'
 		});
@@ -134,6 +146,20 @@ $( 'body' ).click(function(event) {
             contentType: 'application/json;charset=UTF-8'
         });
         return true; //change return to false together with event.preventDefault(); in order to prevent submit
+        // return false; //change return to false together with event.preventDefault(); in order to prevent submit
+    } else if (element.attr("id") == "submit-customized-courses") {
+        putNewCurriculum();
+        // // event.preventDefault(); //change return to false together with event.preventDefault(); in order to prevent submit
+        // var content = JSON.stringify($('form').serializeObject());
+        // $('#result').text(content);
+        // console.log(content)
+        // $.ajax({
+        //     type : "PUT",
+        //     url : '/admin/courses/new'  ,
+        //     data: JSON.stringify(content, null, '\t'),
+        //     contentType: 'application/json;charset=UTF-8'
+        // });
+        // return true; //change return to false together with event.preventDefault(); in order to prevent submit
         // return false; //change return to false together with event.preventDefault(); in order to prevent submit
     }; 
 });

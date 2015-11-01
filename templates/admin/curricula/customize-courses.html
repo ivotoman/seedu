@@ -1,0 +1,159 @@
+{% extends "admin/base-schools.html" %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-xs-12 text-left">
+            <h1>Customize the year and order of all courses</h1>
+        </div>    
+    </div>
+    
+
+<div class="alert alert-danger" id="no-checkbox">
+    <strong>Warning!</strong> Verify that removing topic or element removes it from the customization table and the ordered subtopics!
+</div>
+<form class="form-horizontal" action="{{ url_for('schools') }}" method="GET" id="new-curriculum" onsubmit="putNewCurriculum"> 
+
+    <div class="row">
+        <div class="col-xs-12">
+
+            <div class="row"> 
+                <div class="col-xs-12">
+                    <input type="hidden" name="standardcurriculum_id" value="{{standardcurriculum.id}}">
+                </div>
+            </div> 
+
+            <div class="row"> <!-- tab panel -->
+                <div class="col-xs-12"> <!-- tab col -->
+                    <div class="course-tabs"> <!-- tab container -->
+                        <ul class="nav nav-tabs">
+                            {% for course in selected_courses %}
+                                {% if loop.index == 1 %}
+                                    <li class="active"><a data-toggle="tab" href="#{{course.id}}">{{course.name}}</a></li>
+                                {% else %}
+                                    <li><a data-toggle="tab" href="#{{course.id}}">{{course.name}}</a></li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                        <div class="tab-content">
+                            {% for course in selected_courses %}
+                                {% if loop.index == 1 %}
+                                <div id="{{course.id}}" class="tab-pane fade in active">
+                                {% else %}
+                                <div id="{{course.id}}" class="tab-pane fade"><!-- tab content container -->
+                                {% endif %}<!-- end if first course -->
+                                    <div class="row"><!-- course description row -->
+                                        <div class="col-xs-12">
+                                            <br><p><strong>Course description:</strong> {{course.description}}</p><br>
+                                        </div>
+                                    </div>
+
+                                    <div class="row"> <!-- all topics row -->
+                                        <div class="col-xs-12"><!-- all copics container -->
+                                            {% for topic in course.topics %} <!-- for topic in course.topics -->
+                                                <div class="row topic-row" id="{{topic.id}}"> <!-- topic row -->
+                                                    <div class="col-xs-4"> <!-- topic panel -->
+                                                        <div class="row"> <!-- topic name row -->
+                                                            <div class="col-xs-1">
+                                                                <span class="glyphicon glyphicon-remove" id="remove-topic" aria-hidden="true"></span>
+                                                            </div>
+                                                            <div class="col-xs-11">
+                                                                <strong>Topic name:</strong> {{topic.name}} <br>
+                                                                <strong>Topic description:</strong> {{topic.description}}<br>
+                                                                <!-- <strong>Topic id:</strong> {{topic.id}} -->
+                                                            </div>
+                                                        </div> <!-- /row topic name row -->
+                                                        <br>
+                                                        <div class="row"> <!-- topic order row -->
+                                                            <div class="col-xs-1">
+                                                            </div>
+                                                            <div class="col-xs-11">
+                                                                <div class="input-group">
+                                                                    <span class="input-group-addon control-label">Order:</span>
+                                                                    <input type="number" class="form-control required" value="{{topic.topic_order}}" placeholder="Topic order" name="curriculum_{{standardcurriculum.id}}[course_{{course.id}}][topic_{{topic.id}}][topic_order]" required>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <br>
+                                                        
+
+                                                    </div> <!-- /topic panel -->
+
+
+                                                    <div class="col-xs-8" id="subtopic-panel"> <!-- subtopic panel -->
+                                                        <div class="col-xs-1">
+                                                        </div>
+
+                                                        <div class="col-xs-11"> <!-- effective subtopic panel -->
+
+                                                            {% for subtopic in topic.subtopics %}
+                                                            {% if not loop.index == 1 %}
+                                                                <hr>
+                                                            {% endif %}
+                                                            <div class="row"> <!-- subtopic row -->
+                                                                <div class="col-xs-12">
+                                                                    <div class="row"> <!-- subtopic name + grade row -->
+                                                                        <div class="col-xs-12"> <!-- subtopic name + grade column -->
+                                                                            <div class="col-xs-11">
+                                                                                <strong>Subtopic name:</strong> {{subtopic.name}}<br>
+                                                                                <strong>Subtopic description:</strong> {{subtopic.description}}<br>
+                                                                                <!-- <strong>Subtopic id:</strong> {{subtopic.id}}<br> -->
+                                                                            </div>
+
+                                                                            <div class="col-xs-1">
+                                                                                <span class="glyphicon glyphicon-remove" id="remove-subtopic" aria-hidden="true"></span>
+                                                                            </div>
+                                                                        </div> <!-- /subtopic name + grade column -->
+                                                                    </div><!-- /subtopic name + grade row -->
+                                                                    <br>
+                                                                    <div class="row"> <!-- subtopic year + # hours row -->
+                                                                        <div class="col-xs-12"> <!-- subtopic year + # hours column -->
+                                                                            <div class="col-xs-6">
+                                                                                <div class="input-group">
+                                                                                    <span class="input-group-addon control-label">Year:</span>
+                                                                                    <input type="number" class="form-control required" value="{{subtopic.year}}" placeholder="Year/grade when it will be taught" name="curriculum_{{standardcurriculum.id}}[course_{{course.id}}][topic_{{topic.id}}][subtopic_{{subtopic.id}}][subtopic_year]">
+                                                                                </div> 
+                                                                            </div>
+
+                                                                            <div class="col-xs-5">
+                                                                                <div class="input-group">
+                                                                                    <span class="input-group-addon control-label">Order:</span>
+                                                                                    <input type="number" class="form-control required" value="{{subtopic.subtopic_order}}" placeholder="Subtopic order" name="curriculum_{{standardcurriculum.id}}[course_{{course.id}}][topic_{{topic.id}}][subtopic_{{subtopic.id}}][subtopic_order]" required>
+                                                                                </div>
+                                                                            </div>
+
+                                                                            <div class="col-xs-1">
+                                                                            </div>
+                                                                        </div> <!-- /subtopic year + # hours column -->
+                                                                    </div><!-- /subtopic year + # hours row -->
+                                                                    <br>
+                                                                </div>
+                                                            </div> <!-- /subtopic row -->
+                                                            {% endfor %}
+                                                        </div><!-- /effective subtopic panel -->
+                                                    </div> <!-- /subtopic panel -->
+                                                </div> <!-- /topic row -->
+                                                <hr>
+                                            {% endfor %} <!-- for topic in course.topics -->
+                                        </div><!-- all topics container -->
+                                    </div><!-- all topics row -->
+                                </div> <!-- tab content container -->
+                            {% endfor %}<!-- for course in selected_courses -->
+                        </div>
+                    </div><!-- tab container -->
+                </div><!-- tab col -->
+            </div><!-- tab panel -->
+        </div>
+    </div>
+
+<br>
+<input type="submit" class="btn btn-primary pull-left" id="submit-customized-courses">
+</form>
+<br>
+<br>
+<p>JSON: 
+    <div id="result">
+    </div>
+</p>
+
+
+{% endblock %}

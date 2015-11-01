@@ -25,11 +25,6 @@ db = SQLAlchemy(app)
 
 
 
-curricula_schools=db.Table('curricula_schools',                            
-                             db.Column('curriculum_id', db.Integer,db.ForeignKey('curricula.id'), nullable=False),
-                             db.Column('school_id',db.Integer,db.ForeignKey('schools.id'),nullable=False),
-                             db.PrimaryKeyConstraint('curriculum_id', 'school_id') )
-
 class School(db.Model):
     """docstring for School"""
     __tablename__ = 'schools'
@@ -43,7 +38,8 @@ class School(db.Model):
     country = db.Column(db.String(100), nullable = False)
     web = db.Column(db.String(200), nullable = True, default="not available")
     phone = db.Column(db.String(20), nullable = True, default="not available")
-    curricula = db.relationship("Curriculum", secondary=curricula_schools, backref='schools')
+    curricula = db.relationship("Curriculum", backref="school")
+
 
     def __init__(self, name, street, city, state, postcode, country, web, phone, county = "n/a"):
         self.name = name 
@@ -92,30 +88,66 @@ class Curriculum(db.Model):
     # This id below should reference StandardCurriculum. Hence, define it as foreign key. 
     # Source: http://stackoverflow.com/questions/25189017/tablemodel-inheritance-with-flask-sqlalchemy
     # another example of inheritance and method override: http://snipplr.com/view/36330/ 
+    
     id = db.Column(db.Integer, primary_key=True)
-    standardcurriculum = db.Column(db.Integer, db.ForeignKey('standardcurriculum.id'))
+    standardcurriculum_id = db.Column(db.Integer, db.ForeignKey('standardCurricula.id'))
+
+    # a school has many school curricula. each school curriculum belongs to only 1 school
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id'))
+
     # using JSON column with postgresql http://stackoverflow.com/questions/23878070/using-json-type-with-flask-sqlalchemy-postgresql
     ordered_subtopics = db.Column(JSON)
-#     ordered_subtopics = {"year_1" : {
-#             "course_id" : { 
-#                 "1" : "subtopic_id",
-#                 "2" : "subtopic_id"
-#             },
-#             "course_id" : {
-#                 "1" : "subtopic_id",
-#                 "2" : "subtopic_id"   
-#             }
-#         }
-#     }
+    customization_table = db.Column(JSON)
 
-    def __init__(self, standardcurriculum, customization_table):
-        self.standardcurriculum = standardcurriculum.id
+
+    def __init__(self, standardcurriculum_id, school_id, ordered_subtopics, customization_table):
+        self.standardcurriculum_id = standardcurriculum_id
+        self.school_id = school_id
+        self.ordered_subtopics = ordered_subtopics
         self.customization_table = customization_table
-
 
     def __repr__(self):
         # return '<E-mail %r>' % self.email
         return '<curriculum_id {}>'.format(self.id)
+
+    def get_customization_table(self):
+        return json.loads(self.customization_table)
+
+    def courses(self):
+        customization_table = json.loads(self.customization_table)
+        fetched_courses = customization_table[str(self.standardcurriculum_id)].keys()
+        courses = []
+        for course in fetched_courses:
+            courses.append(db.session.query(Course).filter_by(id = course).one())
+        return courses
+
+    def topics(self):
+        pass
+
+    def subtopics(self):
+        pass
+
+        # customization table holds 3 values custom for each school curriculum = topic order, subtopic order, subtopic year
+        # customization_table[curriculum_id][course_id][topic_id]["topic_order"] = topic_order
+        # customization_table[curriculum_id][course_id][topic_id][subtopic_id]["subtopic_order"] = subtopic_year
+        # customization_table[curriculum_id][course_id][topic_id][subtopic_id]["subtopic_year"] = subtopic_order
+    
+        ordered_subtopics = {}
+        #ordered_subtopic holds ordered info on which subtopics/courses/topics are taught in individual years
+        # order_subtopics form:
+            # {"subtopic_year" : { 
+            #     "course_id" : {    
+            #         "topic_order" : {
+            #             "subtopic_order" : topic_id 
+            #             }
+            #         }
+            #     }
+            # }
+
+
+
+
+
 
 # class CourseGroup(object):
 #     """
@@ -319,7 +351,6 @@ def new_course():
 
         # load json otherwise it will be unicode instead of a dictionary         
         content = json.loads(request.get_json())#["course"]
-        print "content ", request.get_json()
 
         if not content:
             print "bad response format"
@@ -374,7 +405,7 @@ def new_course():
             write a function, which will revert changes if there has been a problem with creation of any item
             """
             pass
-        return True
+        return redirect("/admin/courses", code=303)
 
 
     elif request.method == 'POST':   
@@ -462,10 +493,10 @@ def delete_course(course_id):
 def standard_curricula():
     # try:  
         standardcurricula = db.session.query(StandardCurriculum).all()
-        print "standardcurricula", repr(standardcurricula)
-        for curriculum in standardcurricula:
-            print "curriculum.name", curriculum.name
-            print "curriculum.courses: ", curriculum.courses
+        # print "standardcurricula", repr(standardcurricula)
+        # for curriculum in standardcurricula:
+            # print "curriculum.name", curriculum.name
+            # print "curriculum.courses: ", curriculum.courses
         return render_template('admin/standard-curricula/all.html', standardcurricula = standardcurricula)
     # except:
     #     return "ooops, what happened here?"
@@ -578,8 +609,8 @@ def edit_standard_curriculum(standardcurriculum_id):
     else:# request.method == 'GET':  
         params["courses"] = db.session.query(Course).all()
         params["selected_courses"] = standardcurriculum.courses
-        print 'params["selected_courses"]', params["selected_courses"]
-        print 'params["courses"]', params["courses"]
+        # print 'params["selected_courses"]', params["selected_courses"]
+        # print 'params["courses"]', params["courses"]
         
         return render_template('admin/standard-curricula/edit.html', **params)
 
@@ -599,7 +630,7 @@ def delete_standard_curriculum(standardcurriculum_id):
 def schools():
     # try:  
     schools = db.session.query(School).all()
-    print "schools", repr(schools)
+    # print "schools", repr(schools)
     return render_template('admin/schools/all.html', schools = schools)
     # except:
     #     return "ooops, what happened here?"
@@ -683,39 +714,142 @@ def delete_school(school_id):
 ###############################################################
 ##################### SCHOOL CURRICULA ########################
 ###############################################################
+@app.route('/admin/curricula/<int:curriculum_id>', methods=['GET'])
+def view_curriculum(curriculum_id):
+    curriculum = db.session.query(Curriculum).filter_by(id = curriculum_id).one()
+    courses = curriculum.courses()
+    topics = curriculum.topics()
+    subtopics = curriculum.subtopics()
+    return render_template('admin/curricula/view.html', curriculum = curriculum, selected_courses = courses, customization_table = curriculum.get_customization_table())
 
-# @app.route('/admin/', methods=['GET'])
-# def schools():
-    # json = {standardcurriculum.id : {}}
+@app.route('/admin/curricula/<int:curriculum_id>/edit', methods=['GET', 'POST'])
+def edit_curriculum(curriculum_id):
+    curriculum = db.session.query(Curriculum).filter_by(id = curriculum_id).one()
+    return render_template('admin/curricula/view.html', curriculum = curriculum)
 
-    #     {"standardcurriculum_id" : {
-    #         "course_id_1" : {
-    #             "topic_id_1" : {
-    #                 "subtopic_id_1" : {
-    #                     "order" : 1,
-    #                     "year" : 1
-    #                 },
-    #                 "subtopic_id_2" : {
-    #                     "order" : 1,
-    #                     "year" : 1
-    #                 }
-    #             }
-    #         },
-    #         "course_id_1" : {}
-    #     }}
+@app.route('/admin/curricula/<int:curriculum_id>/delete', methods=['GET'])
+def delete_curriculum(curriculum_id):
+    curriculum = db.session.query(Curriculum).filter_by(id = curriculum_id).one()
+    db.session.delete(curriculum)
+    db.session.commit()
+    return redirect("/admin/schools", code=302)
 
-    #     curriculum.customization_table[standardcurriculum.id][course.id][topic.id][subtopic.id]['order']
-    #     curriculum.customization_table[standardcurriculum.id][course.id][topic.id][subtopic.id]['year']
-    #     for course in standardcurriculum.courses: 
-    #         json[standardcurriculum.id] = {course.id : {}}
-    #         for topic in course.topics:
-    #             json[standardcurriculum.id][course.id] = {topic.id : {}}
-    #             for subtopic in topic.subtopics:
-    #                 json[standardcurriculum.id][course.id][topic.id] = {subtopic.id : {"order" : custom_order, "year" : custom_year}}
-    #                 ordered_subtopics[custom_year][course.id][custom_order] = subtopic.id
-    #                 # json[standardcurriculum.id] = {course.id : {topic.id : {subtopic.id : {"order" : custom_order, "year" : custom_year}}}}
-    #     json[standardcurriculum.id][course.id][topic.id][subtopic.id]["order"] = custom_order
-    #     json[standardcurriculum.id][course.id][topic.id][subtopic.id]["order"] = custom_year
+
+@app.route('/admin/curricula/new/<int:school_id>', methods=['GET', 'POST'])
+def new_curriculum(school_id):
+    school = db.session.query(School).filter_by(id = school_id).one()
+    standardcurricula = db.session.query(StandardCurriculum).all()
+    courses = db.session.query(Course).all()
+    
+    if request.method == 'GET': 
+        return render_template('admin/curricula/new.html', school = school, standardcurricula = standardcurricula, courses = courses)
+    if request.method == 'POST':
+        standardcurriculum = db.session.query(StandardCurriculum).filter_by(id = request.form['standard_curriculum']).one()
+        selected_course_ids = request.form.getlist('course')
+        selected_courses = []
+        for selected_id in selected_course_ids:
+            selected_courses.append(db.session.query(Course).filter_by(id = selected_id).one())
+    return render_template('admin/curricula/customize-courses.html', school = school, standardcurriculum = standardcurriculum, selected_courses = selected_courses)    
+
+    # for course in courses:
+    #     print "course.standardcurricula", course.standardCurricula
+    
+
+@app.route('/admin/curricula/new/<int:school_id>', methods=['GET', 'PUT', 'POST'])
+def new_curriculum_customize(school_id):
+    # http://www.tutorialrepublic.com/twitter-bootstrap-tutorial/bootstrap-tabs.php 
+    
+    if request.method == 'GET': 
+        school = db.session.query(School).filter_by(id = school_id).one()
+        standardcurricula = db.session.query(StandardCurriculum).all()
+        courses = db.session.query(Course).all()
+
+        return render_template('admin/curricula/new.html', school = school, standardcurricula = standardcurricula, courses = courses)
+    
+    elif request.method == 'POST': 
+        return redirect("/admin/schools", code=303)
+    elif request.method == 'PUT': 
+        customization_table = {}
+        # customization table holds 3 values custom for each school curriculum = topic order, subtopic order, subtopic year
+        # customization_table[curriculum_id][course_id][topic_id]["topic_order"] = topic_order
+        # customization_table[curriculum_id][course_id][topic_id][subtopic_id]["subtopic_order"] = subtopic_year
+        # customization_table[curriculum_id][course_id][topic_id][subtopic_id]["subtopic_year"] = subtopic_order
+    
+        ordered_subtopics = {}
+        #ordered_subtopic holds ordered info on which subtopics/courses/topics are taught in individual years
+        # order_subtopics form:
+            # {"subtopic_year" : { 
+            #     "course_id" : {    
+            #         "topic_order" : {
+            #             "subtopic_order" : topic_id 
+            #             }
+            #         }
+            #     }
+            # }
+
+
+        content = json.loads(request.get_json())#["course"]
+        print "content ", request.get_json()
+        
+        curriculum_id = content["standardcurriculum_id"]
+
+        if not content:
+            print "bad response format"
+            abort(400)
+        else:
+            curr_id = "curriculum_" + str(curriculum_id)
+            customization_table[curriculum_id] = {}
+
+            for course in content[curr_id].items():
+                course_id = course[0].split("_")[-1]
+                customization_table[curriculum_id][course_id] = {}
+                course_value = course[1]
+                for topic in course_value:
+                    topic_id = topic.split("_")[-1]
+                    topic_order = course_value[topic]["topic_order"]
+                    customization_table[curriculum_id][course_id][topic_id] = {}
+                    customization_table[curriculum_id][course_id][topic_id]["topic_order"] = topic_order
+                    for subtopic in course_value[topic]:
+                        subtopic_id = subtopic.split("_")[-1]
+                        if subtopic_id != "order":
+                            subtopic_year = course_value[topic][subtopic]["subtopic_year"]
+                            subtopic_order = course_value[topic][subtopic]["subtopic_order"]
+                            customization_table[curriculum_id][course_id][topic_id][subtopic_id] = {}
+                            customization_table[curriculum_id][course_id][topic_id][subtopic_id]["subtopic_order"] = subtopic_year
+                            customization_table[curriculum_id][course_id][topic_id][subtopic_id]["subtopic_year"] = subtopic_order
+                            
+                            if subtopic_year not in ordered_subtopics.keys():
+                                ordered_subtopics[subtopic_year] = {}
+                            if course_id not in ordered_subtopics[subtopic_year].keys():
+                                ordered_subtopics[subtopic_year][course_id] = {}     
+                            if topic_order not in ordered_subtopics[subtopic_year][course_id].keys():
+                                ordered_subtopics[subtopic_year][course_id][topic_order] = {}  
+                            else:
+                                i = int(topic_order)
+                                while i in ordered_subtopics[subtopic_year][course_id].keys():
+                                    i += 1
+                                topic_order = i
+                                ordered_subtopics[subtopic_year][course_id][topic_order] = {}    
+                            if subtopic_order not in ordered_subtopics[subtopic_year][course_id][topic_order].keys():
+                                ordered_subtopics[subtopic_year][course_id][topic_order][subtopic_order] = subtopic_id    
+                            else:
+                                i = int(subtopic_order) + 1
+                                while i in ordered_subtopics[subtopic_year][course_id][topic_order].keys():
+                                    i += 1
+                                    [subtopic_year][course_id][topic_order][i] = subtopic_id    
+
+        customization_table = json.dumps(customization_table)
+        ordered_subtopics = json.dumps(ordered_subtopics)
+        new_curriculum = Curriculum(standardcurriculum_id = curriculum_id, school_id = school_id, ordered_subtopics = ordered_subtopics, customization_table = customization_table)
+        db.session.add(new_curriculum)
+        db.session.commit()
+        print "new_curriculum", new_curriculum
+
+        return redirect("/admin/schools", code=303)
+    elif request.method == 'POST': 
+        return redirect("/admin/schools", code=302)
+
+
 ###############################################################
 ###############################################################
 #################### SUPPORT METHODS ##########################

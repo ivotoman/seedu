@@ -1,0 +1,106 @@
+{% extends "admin/base-schools.html" %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-xs-12 text-left">
+            <h1>{{curriculum.standardcurriculum.name}} in detail</h1>
+        </div>    
+    </div>
+    
+
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="row"> <!-- tab panel -->
+                <div class="col-xs-12"> <!-- tab col -->
+                    <div class="course-tabs"> <!-- tab container -->
+                        <ul class="nav nav-tabs">
+                            {% for course in selected_courses %}
+                                {% if loop.index == 1 %}
+                                    <li class="active"><a data-toggle="tab" href="#{{course.id}}">{{course.name}}</a></li>
+                                {% else %}
+                                    <li><a data-toggle="tab" href="#{{course.id}}">{{course.name}}</a></li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                        <div class="tab-content">
+                            {% for course in selected_courses %}
+                                {% if loop.index == 1 %}
+                                <div id="{{course.id}}" class="tab-pane fade in active">
+                                {% else %}
+                                <div id="{{course.id}}" class="tab-pane fade"><!-- tab content container -->
+                                {% endif %}<!-- end if first course -->
+                                    <div class="row"><!-- course description row -->
+                                        <div class="col-xs-12">
+                                            <br><p><strong>Course description:</strong> {{course.description}}</p><br>
+                                        </div>
+                                    </div>
+
+                                    <div class="row"> <!-- all topics row -->
+                                        <div class="col-xs-12"><!-- all copics container -->
+                                            {% for topic in course.topics %} <!-- for topic in course.topics -->
+                                                <div class="row topic-row" id="{{topic.id}}"> <!-- topic row -->
+                                                    <div class="col-xs-4"> <!-- topic panel -->
+                                                        <div class="row"> <!-- topic name row -->
+
+                                                            <div class="col-xs-12">
+                                                                <strong>Topic name:</strong> {{topic.name}} <br>
+                                                                <strong>Topic description:</strong> {{topic.description}}<br>
+                                                                <strong>Topic order:</strong> {{customization_table[curriculum.standardcurriculum.id|string][course.id|string][topic.id|string]["topic_order"]}}<br>
+                                                            </div>
+                                                        </div> <!-- /row topic name row -->
+                                                        <br>
+                                                    </div> <!-- /topic panel -->
+
+
+                                                    <div class="col-xs-8" id="subtopic-panel"> <!-- subtopic panel -->
+                                                        <div class="col-xs-1">
+                                                        </div>
+
+                                                        <div class="col-xs-11"> <!-- effective subtopic panel -->
+
+                                                            {% for subtopic in topic.subtopics %}
+                                                            {% if not loop.index == 1 %}
+                                                                <hr>
+                                                            {% endif %}
+                                                            <div class="row"> <!-- subtopic row -->
+                                                                <div class="col-xs-12">
+                                                                    <div class="row"> <!-- subtopic name + grade row -->
+                                                                        <div class="col-xs-12"> <!-- subtopic name + grade column -->
+                                                                            <strong>Subtopic name:</strong> {{subtopic.name}}<br>
+                                                                            <div class="row">
+                                                                                <div class="col-xs-4">
+                                                                                    <strong>Subtopic year:</strong> {{customization_table[curriculum.standardcurriculum.id|string][course.id|string][topic.id|string][subtopic.id|string]["subtopic_year"]}}<br>
+                                                                                </div>
+                                                                                <div class="col-xs-8">
+                                                                                    <strong>Subtopic order:</strong> {{customization_table[curriculum.standardcurriculum.id|string][course.id|string][topic.id|string][subtopic.id|string]["subtopic_order"]}}<br>
+                                                                                </div>
+                                                                            </div>
+                                                                            <strong>Subtopic description:</strong> {{subtopic.description}}<br>
+                                                                        </div> <!-- /subtopic name + grade column -->
+                                                                    </div><!-- /subtopic name + grade row -->
+                                                                    <br>
+                                                                </div>
+                                                            </div> <!-- /subtopic row -->
+                                                            {% endfor %}
+                                                        </div><!-- /effective subtopic panel -->
+                                                    </div> <!-- /subtopic panel -->
+
+
+                                                    
+                                                </div> <!-- /topic row -->
+                                                <hr>
+                                            {% endfor %} <!-- for topic in course.topics -->
+                                        </div><!-- all topics container -->
+                                    </div><!-- all topics row -->
+                                </div> <!-- tab content container -->
+                            {% endfor %}<!-- for course in selected_courses -->
+                        </div>
+                    </div><!-- tab container -->
+                </div><!-- tab col -->
+            </div><!-- tab panel -->
+        </div>
+    </div>
+
+
+
+{% endblock %}

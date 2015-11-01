@@ -193,8 +193,11 @@
 <input type="submit" class="btn btn-primary pull-left" id="submit-new-course" >
 </form>
 
-<h2>JSON</h2>
-<pre id="result">
-</pre>
 
+<script type="text/javascript">
+$('textarea').each(function(){
+    $(this).val($(this).val().trim());
+    console.log($(this).val())
+});
+</script>
 {% endblock %}
