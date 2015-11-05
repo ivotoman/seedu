@@ -17,7 +17,7 @@
 
 
 
-<form class="form-horizontal" action="{{url_for('new_course')}}" method="POST" id="new-course"> 
+<form class="form-horizontal" action="{{url_for('new_course')}}" method="POST" id="new-course" onsubmit="return checkOrder();"> 
 
     <div class="row">
         <div class="col-xs-12">
@@ -66,130 +66,16 @@
     <hr>
     
     
-    <div class="row topic-row" id="1"> <!-- topic row -->
-
-        <div class="col-xs-4"> <!-- topic panel -->
-            <div class="row"> <!-- topic name row -->
-                <div class="col-xs-1">
-                    <span class="glyphicon glyphicon-remove" id="remove-topic" aria-hidden="true"></span>
-                </div>
-                <div class="col-xs-11">
-                    <div class="input-group">
-                        <span class="input-group-addon control-label required">Topic name:</span>
-                        <input type="text" class="form-control required" placeholder="Please enter the topic name" name="course[topic_1][topic_name]" required>
-                    </div>   
-                </div>
-            </div> <!-- /row topic name row -->
-            <br>
-            <div class="row"> <!-- topic order row -->
-                <div class="col-xs-1">
-                </div>
-                <div class="col-xs-11">
-                    <div class="input-group">
-                        <span class="input-group-addon control-label">Order:</span>
-                        <input type="number" class="form-control required" placeholder="Topic order" name="course[topic_1][topic_order]" required>
-                    </div>
-                </div>
-            </div>
-            <br>
-            <div class="row"> <!-- topic description row -->
-                <div class="col-xs-1">
-                </div>
-                <div class="col-xs-11">
-                    <div class="form-group">
-                        <label class="control-label" for="topic_description">Topic description:</label>
-                        <textarea rows="4" class="form-control required" name="course[topic_1][topic_description]" placeholder="Please write a bried description of the topic here">{{topic_description_1}}</textarea>
-                    </div> 
-                </div>
-            </div>
-
-        </div> <!-- /topic panel -->
-
-
-        <div class="col-xs-8" id="subtopic-panel"> <!-- subtopic panel -->
-            <div class="col-xs-1">
-            </div>
-
-            <div class="col-xs-11"> <!-- effective subtopic panel -->
-                <div class="row"> <!-- subtopic row -->
-                    <div class="col-xs-12">
-                        <div class="row"> <!-- subtopic name + grade row -->
-                            <div class="col-xs-12"> <!-- subtopic name + grade column -->
-                                <div class="col-xs-8">
-                                    <div class="input-group">
-                                        <span class="input-group-addon control-label">Subtopic name:</span>
-                                        <input type="text" class="form-control required" placeholder="Please enter the subtopic name" name="course[topic_1][subtopic_1][subtopic_name]" required>
-                                    </div> 
-                                </div>
-
-                                <div class="col-xs-3">
-                                    <div class="input-group">
-                                        <span class="input-group-addon control-label">Order:</span>
-                                        <input type="number" class="form-control required" placeholder="Subtopic order" name="course[topic_1][subtopic_1][subtopic_order]" required>
-                                    </div>
-                                    
-                                </div>
-                                <div class="col-xs-1">
-                                    <span class="glyphicon glyphicon-remove" id="remove-subtopic" aria-hidden="true"></span>
-                                </div>
-
-
-                            </div> <!-- /subtopic name + grade column -->
-                        </div><!-- /subtopic name + grade row -->
-                        <br>
-                        <div class="row"> <!-- subtopic year + # hours row -->
-                            <div class="col-xs-12"> <!-- subtopic year + # hours column -->
-                                <div class="col-xs-6">
-                                    <div class="input-group">
-                                        <span class="input-group-addon control-label">Year:</span>
-                                        <input type="number" class="form-control required" placeholder="Year/grade when it will be taught" name="course[topic_1][subtopic_1][subtopic_year]">
-                                    </div> 
-                                </div>
-
-                                <div class="col-xs-5">
-                                    <div class="input-group">
-                                        <span class="input-group-addon control-label"># hours:</span>
-                                        <input type="number" step="0.01" class="form-control required" placeholder="Hours spent on it" name="course[topic_1][subtopic_1][subtopic_hours]">
-                                    </div>
-                                    
-                                </div>
-                                <div class="col-xs-1">
-                                </div>
-
-
-                            </div> <!-- /subtopic year + # hours column -->
-                        </div><!-- /subtopic year + # hours row -->
-                        <br>
-
-                        <div class="row"> <!-- subtopic description row -->
-                            <div class="col-xs-12"> <!-- subtopic descripton column -->
-                                <div class="col-xs-2">
-                                    <label class="control-label" for="subtopic_description">Subtopic description:</label>
-                                </div>
-                                <div class="col-xs-10">
-                                    <div class="form-group">
-                                        <textarea rows="3" class="form-control required" name="course[topic_1][subtopic_1][subtopic_description]" placeholder="Please write a bried description of the subtopic here"></textarea>
-                                    </div> 
-                                </div> 
-                            </div> <!-- /subtopic name + grade column -->
-                        </div><!-- /subtopic name + grade row -->
-
-                    </div>
-                </div> <!-- /subtopic row -->
-                <hr>
-
-                <button class="btn btn-success pull-right subtopic" id="subtopic" onclick="submitNewCourse(event);">Add a subtopic</button>
-
-
-
-            </div><!-- /effective subtopic panel -->
-
-        </div> <!-- /subtopic panel -->
-
-    </div> <!-- /topic row -->
-    <hr>
+    
     <a class="topic btn btn-success pull-left" role="button" id="topic">Add a topic</a>
 <br><br>
+<div class="row">   
+    <div class="col-xs-12 alert alert-danger" id="order-error" style="display: none;">
+        <strong>Warning!</strong> There has been a problem with ordering your course. Please review highlighted fields.
+        <br>
+    </div>
+</div>
+<br>
 <input type="submit" class="btn btn-primary pull-left" id="submit-new-course" >
 </form>
 
@@ -199,5 +85,8 @@ $('textarea').each(function(){
     $(this).val($(this).val().trim());
     console.log($(this).val())
 });
+
+addTopic($('#topic:last'));
+
 </script>
 {% endblock %}

@@ -3,7 +3,7 @@
 These are HTML strings. Use JavaScript functions to replace the %data% placeholder text.
 */
 var HTMLSubtopicRow = 
-                  '<div class="row"> <!-- subtopic row -->' +
+                  '<div class="row subtopic-row"> <!-- subtopic row -->' +
                     '<div class="col-xs-12">' +
                         '<div class="row"> <!-- subtopic name + grade row -->' +
                             '<div class="col-xs-12"> <!-- subtopic name + grade column -->' +
@@ -17,7 +17,7 @@ var HTMLSubtopicRow =
                                 '<div class="col-xs-3">' +
                                     '<div class="input-group">' +
                                         '<span class="input-group-addon control-label">Order:</span>' +
-                                        '<input type="number" class="form-control required" placeholder="Subtopic order" name="course[topic_%topicdata%][subtopic_%subtopicdata%][subtopic_order]" required>' +
+                                        '<input type="number" class="form-control subtopic-order required" placeholder="Subtopic order" name="course[topic_%topicdata%][subtopic_%subtopicdata%][subtopic_order]" id="new_%subtopicdata%" required>' +
                                     '</div>' +
                                     
                                 '</div>' +
@@ -34,7 +34,7 @@ var HTMLSubtopicRow =
                                 '<div class="col-xs-6">' +
                                     '<div class="input-group">' +
                                         '<span class="input-group-addon control-label">Year:</span>' +
-                                        '<input type="number" class="form-control required" placeholder="Year/grade when it will be taught" name="course[topic_%topicdata%][subtopic_%subtopicdata%][subtopic_year]">' +
+                                        '<input type="number" class="form-control subtopic-year required" placeholder="Year/grade when it will be taught" name="course[topic_%topicdata%][subtopic_%subtopicdata%][subtopic_year]" id="new_%subtopicdata%" required>' +
                                     '</div> ' +
                                 '</div>' +
 
@@ -69,7 +69,7 @@ var HTMLSubtopicRow =
 
 
 var HTMLTopicRow = 
-'<div class="row topic-row" id="%topicdata%"> <!-- topic row -->' +
+'<div class="row topic-row" id="newtopic_%topicdata%"> <!-- topic row -->' +
         '<div class="col-xs-4"> <!-- topic panel -->' +
             '<div class="row"> <!-- topic name row -->' +
                 '<div class="col-xs-1">' +
@@ -89,7 +89,7 @@ var HTMLTopicRow =
                 '<div class="col-xs-11">' +
                     '<div class="input-group">' +
                         '<span class="input-group-addon control-label">Order:</span>' +
-                        '<input type="number" class="form-control required" placeholder="Topic order" name="course[topic_%topicdata%][topic_order]" required>' +
+                        '<input type="number" class="form-control topic-order required" placeholder="Topic order" name="course[topic_%topicdata%][topic_order]" id="newtopic_%topicdata%" required>' +
                     '</div>' +
                 '</div>' +
             '</div>' +
@@ -114,7 +114,7 @@ var HTMLTopicRow =
             '</div>' +
 
             '<div class="col-xs-11"> <!-- effective subtopic panel -->' +
-                '<div class="row"> <!-- subtopic row -->' +
+                '<div class="row subtopic-row"> <!-- subtopic row -->' +
                     '<div class="col-xs-12">' +
                         '<div class="row"> <!-- subtopic name + grade row -->' +
                             '<div class="col-xs-12"> <!-- subtopic name + grade column -->' +
@@ -128,7 +128,7 @@ var HTMLTopicRow =
                                 '<div class="col-xs-3">' +
                                     '<div class="input-group">' +
                                         '<span class="input-group-addon control-label">Order:</span>' +
-                                        '<input type="number" class="form-control required" placeholder="Subtopic order" name="course[topic_%topicdata%][subtopic_%subtopicdata%][subtopic_order]" required>' +
+                                        '<input type="number" class="form-control subtopic-order required" placeholder="Subtopic order" name="course[topic_%topicdata%][subtopic_%subtopicdata%][subtopic_order]" id="newsubtopic_%subtopicdata%" required>' +
                                     '</div>' +
                                     
                                 '</div>' +
@@ -145,7 +145,7 @@ var HTMLTopicRow =
                                 '<div class="col-xs-6">' +
                                     '<div class="input-group">' +
                                         '<span class="input-group-addon control-label">Year:</span>' +
-                                        '<input type="number" class="form-control required" placeholder="Year/grade when it will be taught" name="course[topic_%topicdata%][subtopic_%subtopicdata%][subtopic_year]">' +
+                                        '<input type="number" class="form-control subtopic-year required" placeholder="Year/grade when it will be taught" name="course[topic_%topicdata%][subtopic_%subtopicdata%][subtopic_year]" id="newsubtopic_%subtopicdata%" required>' +
                                     '</div> ' +
                                 '</div>' +
 
@@ -177,8 +177,8 @@ var HTMLTopicRow =
                     '</div>' +
                   '</div> <!-- /subtopic row -->' +
                   '<hr>' +
-                '<button class="btn btn-success pull-right subtopic" id="subtopic">Add a subtopic</button>' +
-
+                '<a class="subtopic btn btn-success pull-right" role="button" id="subtopic">Add a subtopic</a>' +
+            '<div id="end-of-subtopic" style="display: none;"></div>' +
             '</div><!-- /effective subtopic panel -->' +
 
         '</div> <!-- /subtopic panel -->' +

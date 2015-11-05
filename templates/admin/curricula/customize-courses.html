@@ -11,7 +11,11 @@
 <div class="alert alert-danger" id="no-checkbox">
     <strong>Warning!</strong> Verify that removing topic or element removes it from the customization table and the ordered subtopics!
 </div>
-<form class="form-horizontal" action="{{ url_for('schools') }}" method="GET" id="new-curriculum" onsubmit="putNewCurriculum"> 
+{% if currect_courses %}
+<form class="form-horizontal" action="{{ url_for('edit_curriculum_customize', curriculum_id = curriculum.id) }}" method="POST" id="edit-curriculum" onsubmit="return checkOrderAndPutNewCurriculum();"> 
+{% else %}
+<form class="form-horizontal" action="{{ url_for('new_curriculum_customize', school_id = school.id) }}" method="POST" id="new-curriculum" onsubmit="return checkOrderAndPutNewCurriculum();"> 
+{% endif %}
 
     <div class="row">
         <div class="col-xs-12">
@@ -59,7 +63,6 @@
                                                             <div class="col-xs-11">
                                                                 <strong>Topic name:</strong> {{topic.name}} <br>
                                                                 <strong>Topic description:</strong> {{topic.description}}<br>
-                                                                <!-- <strong>Topic id:</strong> {{topic.id}} -->
                                                             </div>
                                                         </div> <!-- /row topic name row -->
                                                         <br>
@@ -69,12 +72,20 @@
                                                             <div class="col-xs-11">
                                                                 <div class="input-group">
                                                                     <span class="input-group-addon control-label">Order:</span>
-                                                                    <input type="number" class="form-control required" value="{{topic.topic_order}}" placeholder="Topic order" name="curriculum_{{standardcurriculum.id}}[course_{{course.id}}][topic_{{topic.id}}][topic_order]" required>
+                                                                    <input type="number" class="form-control required topic-order {{course.id}}" {% if current_topics and topic.id in current_topics.keys() %} 
+                                                                            value="{{current_topics[topic.id]}}"
+                                                                        {% else %}
+                                                                            value="{{topic.topic_order}}"
+                                                                        {% endif %} placeholder="Topic order" 
+                                                                        {% if current_topics %}
+                                                                        name="curriculum_{{curriculum.id}}[course_{{course.id}}][topic_{{topic.id}}][topic_order]"
+                                                                        {% else %}
+                                                                        name="curriculum_{{standardcurriculum.id}}[course_{{course.id}}][topic_{{topic.id}}][topic_order]"{% endif %}
+                                                                        id="{{topic.id}}" required>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                         <br>
-                                                        
 
                                                     </div> <!-- /topic panel -->
 
@@ -110,14 +121,36 @@
                                                                             <div class="col-xs-6">
                                                                                 <div class="input-group">
                                                                                     <span class="input-group-addon control-label">Year:</span>
-                                                                                    <input type="number" class="form-control required" value="{{subtopic.year}}" placeholder="Year/grade when it will be taught" name="curriculum_{{standardcurriculum.id}}[course_{{course.id}}][topic_{{topic.id}}][subtopic_{{subtopic.id}}][subtopic_year]">
+                                                                                    <input type="number" class="form-control required subtopic-year" {% if current_subtopics and subtopic.id in current_subtopics.keys() %} 
+                                                                                            value="{{current_subtopics[subtopic.id]['subtopic_year']}}"
+                                                                                    {% else %}
+                                                                                        value="{{subtopic.year}}"
+                                                                                    {% endif %}
+                                                                                    placeholder="Year/grade when it will be taught" 
+                                                                                    {% if current_topics %}
+                                                                                        name="curriculum_{{curriculum.id}}[course_{{course.id}}][topic_{{topic.id}}][subtopic_{{subtopic.id}}][subtopic_year]"
+                                                                                    {% else %}
+                                                                                        name="curriculum_{{standardcurriculum.id}}[course_{{course.id}}][topic_{{topic.id}}][subtopic_{{subtopic.id}}][subtopic_year]" 
+                                                                                    {% endif %}
+                                                                                        id="{{subtopic.id}}" required>
                                                                                 </div> 
                                                                             </div>
 
                                                                             <div class="col-xs-5">
                                                                                 <div class="input-group">
                                                                                     <span class="input-group-addon control-label">Order:</span>
-                                                                                    <input type="number" class="form-control required" value="{{subtopic.subtopic_order}}" placeholder="Subtopic order" name="curriculum_{{standardcurriculum.id}}[course_{{course.id}}][topic_{{topic.id}}][subtopic_{{subtopic.id}}][subtopic_order]" required>
+                                                                                    <input type="number" class="form-control required subtopic-order" {% if current_subtopics and subtopic.id in current_subtopics.keys()%} 
+                                                                                        value="{{current_subtopics[subtopic.id]['subtopic_order']}}"
+                                                                                    {% else %}
+                                                                                        value="{{subtopic.subtopic_order}}"
+                                                                                    {% endif %}
+                                                                                    placeholder="Subtopic order" 
+                                                                                    {% if current_topics %}
+                                                                                        name="curriculum_{{curriculum.id}}[course_{{course.id}}][topic_{{topic.id}}][subtopic_{{subtopic.id}}][subtopic_order]"
+                                                                                    {% else %}
+                                                                                        name="curriculum_{{standardcurriculum.id}}[course_{{course.id}}][topic_{{topic.id}}][subtopic_{{subtopic.id}}][subtopic_order]"
+                                                                                    {% endif %}
+                                                                                    id="{{subtopic.id}}" required>
                                                                                 </div>
                                                                             </div>
 
@@ -144,16 +177,15 @@
             </div><!-- tab panel -->
         </div>
     </div>
-
-<br>
+<div class="row">
+    <div class="col-xs-12 alert alert-danger" id="order-error" style="display: none;">
+        <strong>Warning!</strong> There has been a problem with ordering your course. Please review highlighted fields.
+        <br>
+    </div>
+</div>
 <input type="submit" class="btn btn-primary pull-left" id="submit-customized-courses">
 </form>
 <br>
-<br>
-<p>JSON: 
-    <div id="result">
-    </div>
-</p>
 
 
 {% endblock %}

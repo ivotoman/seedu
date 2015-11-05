@@ -1,38 +1,116 @@
+function clearErrors () {
+    console.log("cleaning up")
+    $('.input-group').each(function() {
+        if ($(this).hasClass("has-error")) {
+            $(this).removeClass("has-error");
+        }
+    });
+    $('#order-error').hide();
+};
+
+function putCourse () {
+    console.log("putting courses")
+    // event.preventDefault(); //change return to false together with event.preventDefault(); in order to prevent submit
+    var content = JSON.stringify($('form').serializeObject());
+    $('#result').text(content);
+    console.log(content)
+    var pathname = window.location.pathname
+    $.ajax({
+        type : "PUT",
+        url : pathname,
+        data: JSON.stringify(content, null, '\t'),
+        contentType: 'application/json;charset=UTF-8'
+    });
+    return true; //change return to false together with event.preventDefault(); in order to prevent submit
+    // return false; //change return to false together with event.preventDefault(); in order to prevent submit
+};
+
+
+function checkOrder (schoolCurriculum) {
+    clearErrors();
+    event.preventDefault();
+    var allGood = true
+    console.log("starting anew. allGood = " + allGood)
+    $('input').each(function() {
+        
+        console.log("")
+        console.log("")
+        console.log("")
+        var $current = $(this);
+        var current_topic_id = $(this).parents(".topic-row:first").find(".topic-order:first").attr('id');
+        if ($(this).hasClass("topic-order")) {
+            $('.topic-order').each(function() {
+                if ($(this).val() == $current.val() && $(this).attr('id') != $current.attr('id') && $(this).attr('class') == $current.attr('class')) {
+                    console.log("error: topic-order")
+                    if (!$current.parent().hasClass("has-error")) {
+                        $current.parent().addClass("has-error");
+                    }
+                    if (!$(this).parent().hasClass("has-error")) {
+                        $current.parent().addClass("has-error");
+                    }
+                    allGood = false;
+                } else {
+                    // console.log("changing topic-order: value, or class didn't match or ids matched")
+                    console.log("")
+                }
+            })
+        } else if ($(this).hasClass("subtopic-order")) {
+            $('.subtopic-order').each(function() {
+                var this_topic_id = $(this).parents(".topic-row:first").find(".topic-order:first").attr('id');
+                var $current_year = $current.parent().parent().parent().parent().parent().find(".subtopic-year")
+                if ($(this).val() == $current.val() && $(this).attr('id') != $current.attr('id') && $(this).attr('class') == $current.attr('class')) {
+                    var subtopic_year = $(this).parent().parent().parent().parent().parent().find(".subtopic-year")
+                    var this_topic_id = $(this).parents(".topic-row").find(".topic-order:first").attr('id'); 
+                    if ($(subtopic_year).val() == $current_year.val() && this_topic_id == current_topic_id) {
+                        console.log("error: subtopic-order")
+                        $current.parent().addClass("has-error");    
+                        $(this).parent().addClass("has-error");
+                        $current_year.parent().addClass("has-error");  
+                        $(subtopic_year).parent().addClass("has-error"); 
+                        allGood = false;
+                    } else {
+                        // console.log("this and current belong to different topics eventually the the subtopics have different ids")
+                        console.log("")
+                    }
+
+                    
+                } else {
+                    // console.log("changing subtopic-order: value, or class didn't match or ids matched")                
+                    console.log("")
+                }
+            })
+        }  else {
+            // console.log("else of event listener to inputs")
+            console.log("")   
+        } 
+    })
+    
+    console.log("finished the function. allGood = " + allGood)
+
+    if (allGood == true) {
+        if (schoolCurriculum) {
+            console.log("returning true to checkOrderAndPutNewCurriculum")   
+            return true
+        } else {
+            putCourse();
+        };
+        
+    } else if (allGood == false) {
+        console.log("there are errors!")
+        $('#order-error').show() 
+        return false
+    };    
+    
+};
+
+
+
 ////////////////////////////////////////////////
 ////////////////////////////////////////////////
 /////////////new standard curricula/////////////
 ////////////////////////////////////////////////
 ////////////////////////////////////////////////
-function hideCoursesEdit () {
-    var courses = $('.available-courses')
-    var selected = $("#select-grade").val()
-    for (var i = courses.length - 1; i >= 0; i--) {
-        if ($(courses[i]).hasClass(selected)) {    
-            $(courses[i]).show()
-            if ($(courses[i]).hasClass("jinja")) {
-                $(courses[i]).find('input').prop('checked', true); // Checks it    
-            };
-                
-        } else {
-            $(courses[i]).hide()
-            $(courses[i]).find('input').prop('checked', false); // Unchecks it
-        };
-    }
-};
 
-function hideCoursesNew () {
-    var courses = $('.available-courses')
-    var standardCurriculum = $("#select-grade").val()
-    for (var i = courses.length - 1; i >= 0; i--) {
-        if ($(courses[i]).hasClass(selected)) {    
-            $(courses[i]).show()
-                $(courses[i]).find('input').prop('checked', true); // Checks it    
-        } else {
-            $(courses[i]).hide()
-            $(courses[i]).find('input').prop('checked', false); // Unchecks it
-        };
-    }
-};
 
 $(function() {
     $('#submit-new-standard-curricula').click(function(event) {
@@ -67,8 +145,27 @@ function hideCoursesNewCurriculum () {
     }
 };
 
+
+
+
+function checkOrderAndPutNewCurriculum () {
+    var allGood = checkOrder(true);
+    if (allGood == true) {
+        console.log("I am ready to puNewCurriculum:  allGood = " + allGood)
+        putNewCurriculum();
+        // info on js redirect http://stackoverflow.com/questions/503093/how-can-i-make-a-redirect-page-using-jquery
+        window.location.href = '/admin/schools';
+        return true;
+    } else {
+        console.log("ERROR: allGood = " + allGood)
+        return false;
+    };
+    console.log("this should not be HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+}
+
+
 function putNewCurriculum () {
-    event.preventDefault(); //change return to false together with event.preventDefault(); in order to prevent submit
+    // event.preventDefault(); //change return to false together with event.preventDefault(); in order to prevent submit
     var content = JSON.stringify($('form').serializeObject());
     $('#result').text(content);
     console.log(content)
@@ -89,8 +186,61 @@ function putNewCurriculum () {
 ////////////////////courses/////////////////////
 ////////////////////////////////////////////////
 ////////////////////////////////////////////////
-var topicCounter = 2
-var subtopicCounter = 2
+
+// i am not sure if these counters could interfere with topic and subtopic IDs
+var topicCounter = 1
+var subtopicCounter = 1
+
+function addTopic (element) {
+    var topic = HTMLTopicRow.replace(/(%subtopicdata%)/g, subtopicCounter);
+    var newTopic = $(topic.replace(/(%topicdata%)/g, topicCounter));
+    topicCounter ++;
+    subtopicCounter ++;
+    newTopic.insertBefore(element);
+};
+
+function addSubtopic (element) {
+    var topic_id = element.parent().parent().parent().attr("id");
+    var topic = HTMLSubtopicRow.replace(/(%topicdata%)/g, topic_id);
+    var newSubtopic = $(topic.replace(/(%subtopicdata%)/g, subtopicCounter));
+    subtopicCounter ++;
+    newSubtopic.insertBefore(element);
+};
+
+function hideCoursesEdit () {
+    var courses = $('.available-courses')
+    var selected = $("#select-grade").val()
+    for (var i = courses.length - 1; i >= 0; i--) {
+        if ($(courses[i]).hasClass(selected)) {    
+            $(courses[i]).show()
+            if ($(courses[i]).hasClass("jinja")) {
+                $(courses[i]).find('input').prop('checked', true); // Checks it    
+            };
+                
+        } else {
+            $(courses[i]).hide()
+            $(courses[i]).find('input').prop('checked', false); // Unchecks it
+        };
+    }
+};
+
+function hideCoursesNew () {
+    console.log("hide courses called")
+    var courses = $('.available-courses')
+    var selected = $("#select-grade").val()
+    var standardCurriculum = $("#select-grade").val()
+    for (var i = courses.length - 1; i >= 0; i--) {
+        if ($(courses[i]).hasClass(selected)) {    
+            $(courses[i]).show()
+                $(courses[i]).find('input').prop('checked', true); // Checks it    
+        } else {
+            $(courses[i]).hide()
+            $(courses[i]).find('input').prop('checked', false); // Unchecks it
+        };
+    }
+};
+
+
 $( 'body' ).click(function(event) {
 
 	var element = $(event.target);
@@ -108,32 +258,21 @@ $( 'body' ).click(function(event) {
 		hr.remove();
 
     } else if (element.attr("id") == "topic") {
-		var topic = HTMLTopicRow.replace(/(%subtopicdata%)/g, subtopicCounter);
-		var newTopic = $(topic.replace(/(%topicdata%)/g, topicCounter));
-		topicCounter ++;
-		subtopicCounter ++;
-		event.preventDefault();
-		newTopic.insertBefore(element);
-
+        addTopic(element);
     } else if (element.attr("id") == "subtopic") {
-		var topic_id = element.parent().parent().parent().attr("id");
-		var topic = HTMLSubtopicRow.replace(/(%topicdata%)/g, topic_id);
-		var newSubtopic = $(topic.replace(/(%subtopicdata%)/g, subtopicCounter));
-		subtopicCounter ++;
-		event.preventDefault();
-		newSubtopic.insertBefore(element);
+        addSubtopic(element);
 
-    } else if (element.attr("id") == "submit-edit-course") {
-    	// event.preventDefault(); //change return to false together with event.preventDefault(); in order to prevent submit
-        var content = JSON.stringify($('form').serializeObject());
-        $('#result').text(content);
-        var pathname = window.location.pathname
-        $.ajax({
-		    type : "POST",
-		    url : pathname,
-		    data: JSON.stringify(content, null, '\t'),
-		    contentType: 'application/json;charset=UTF-8'
-		});
+  //   } else if (element.attr("id") == "submit-edit-course") {
+  //   	// event.preventDefault(); //change return to false together with event.preventDefault(); in order to prevent submit
+  //       var content = JSON.stringify($('form').serializeObject());
+  //       $('#result').text(content);
+  //       var pathname = window.location.pathname
+  //       $.ajax({
+		//     type : "POST",
+		//     url : pathname,
+		//     data: JSON.stringify(content, null, '\t'),
+		//     contentType: 'application/json;charset=UTF-8'
+		// });
     } else if (element.attr("id") == "submit-new-course") {
         // event.preventDefault(); //change return to false together with event.preventDefault(); in order to prevent submit
         var content = JSON.stringify($('form').serializeObject());
@@ -147,8 +286,8 @@ $( 'body' ).click(function(event) {
         });
         return true; //change return to false together with event.preventDefault(); in order to prevent submit
         // return false; //change return to false together with event.preventDefault(); in order to prevent submit
-    } else if (element.attr("id") == "submit-customized-courses") {
-        putNewCurriculum();
+    // } else if (element.attr("id") == "submit-customized-courses") {
+    //     putNewCurriculum();
         // // event.preventDefault(); //change return to false together with event.preventDefault(); in order to prevent submit
         // var content = JSON.stringify($('form').serializeObject());
         // $('#result').text(content);
